@@ -42,6 +42,11 @@ export default function ChatInput({ onSendMessage, disabled = false }: ChatInput
 
   return (
     <div className="w-full max-w-4xl mx-auto">
+      {/* Welcome message above the input */}
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-semibold text-dark-text mb-2">What can I help with?</h2>
+      </div>
+
       <form onSubmit={handleSubmit} className="relative">
         <div className="flex items-end gap-2 bg-dark-surface border border-dark-border rounded-xl p-3 focus-within:ring-2 focus-within:ring-accent focus-within:border-transparent">
           {/* Add button - placeholder for now */}
@@ -87,11 +92,6 @@ export default function ChatInput({ onSendMessage, disabled = false }: ChatInput
           </button>
         </div>
       </form>
-      
-      {/* Welcome message when no messages */}
-      <div className="text-center mt-8">
-        <h2 className="text-2xl font-semibold text-dark-text mb-2">What can I help with?</h2>
-      </div>
     </div>
   )
 }
