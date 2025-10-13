@@ -91,7 +91,8 @@ export default function ChatInterface() {
         }
       }
 
-      const response = await fetch('/api/chat', {
+      const apiUrl = '/api/chat'
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

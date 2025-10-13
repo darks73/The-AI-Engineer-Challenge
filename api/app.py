@@ -94,5 +94,11 @@ async def health_check():
 # Entry point for running the application directly
 if __name__ == "__main__":
     import uvicorn
-    # Start the server on all network interfaces (0.0.0.0) on port 8000
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    import os
+    # Get port from environment variable (for cloud platforms) or default to 8000
+    port = int(os.environ.get("PORT", 8000))
+    # Start the server on all network interfaces (0.0.0.0) on the specified port
+    uvicorn.run(app, host="0.0.0.0", port=port)
+
+# For Vercel serverless functions
+handler = app
