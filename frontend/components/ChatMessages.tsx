@@ -5,9 +5,11 @@ import MessageBubble from './MessageBubble'
 
 interface Message {
   id: string
-  role: 'user' | 'assistant'
+  role: 'user' | 'assistant' | 'system'
   content: string
   timestamp: Date
+  attachments?: File[]
+  status?: 'pending' | 'sent' | 'failed'
 }
 
 interface ChatMessagesProps {
