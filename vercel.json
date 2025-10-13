@@ -2,21 +2,5 @@
     "version": 2,
     "buildCommand": "cd frontend && npm install && npm run build",
     "outputDirectory": "frontend/.next",
-    "installCommand": "cd frontend && npm install",
-    "framework": "nextjs",
-    "functions": {
-      "api/app.py": {
-        "runtime": "python3.9"
-      }
-    },
-    "routes": [
-      { 
-        "src": "/api/(.*)", 
-        "dest": "/api/app.py"
-      },
-      { 
-        "src": "/(.*)", 
-        "dest": "/$1"
-      }
-    ]
+    "installCommand": "cd frontend && npm install"
   } 
