@@ -1,0 +1,14 @@
+{
+  "name": "ai-engineer-challenge",
+  "version": "1.0.0",
+  "description": "AI Chat application with OpenAI Vision API",
+  "private": true,
+  "scripts": {
+    "build": "cd frontend && npm run build",
+    "dev": "cd frontend && npm run dev",
+    "start": "cd frontend && npm run start"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

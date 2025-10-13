@@ -1,17 +1,14 @@
 {
     "version": 2,
-    "builds": [
-      { 
-        "src": "frontend/package.json", 
-        "use": "@vercel/next",
-        "config": { "distDir": ".next" }
-      },
-      { 
-        "src": "api/app.py",
-        "use": "@vercel/python",
-        "config": { "maxLambdaSize": "50mb" }
+    "buildCommand": "cd frontend && npm install && npm run build",
+    "outputDirectory": "frontend/.next",
+    "installCommand": "cd frontend && npm install",
+    "framework": "nextjs",
+    "functions": {
+      "api/app.py": {
+        "runtime": "python3.9"
       }
-    ],
+    },
     "routes": [
       { 
         "src": "/api/(.*)", 
@@ -19,10 +16,7 @@
       },
       { 
         "src": "/(.*)", 
-        "dest": "/frontend/$1"
+        "dest": "/$1"
       }
-    ],
-    "env": {
-      "PYTHON_VERSION": "3.9"
-    }
+    ]
   } 
