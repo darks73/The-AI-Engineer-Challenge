@@ -61,6 +61,11 @@ export default function ChatInput({ onSendMessage, disabled = false }: ChatInput
               onKeyDown={handleKeyDown}
               placeholder="Ask anything"
               disabled={disabled}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
+              data-form-type="other"
               className="w-full bg-transparent text-dark-text placeholder-dark-text-secondary resize-none focus:outline-none min-h-[24px] max-h-32"
               rows={1}
             />
