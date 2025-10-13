@@ -86,6 +86,11 @@ async def chat(request: ChatRequest):
         # Handle any errors that occur during processing
         raise HTTPException(status_code=500, detail=str(e))
 
+# Define a root endpoint for testing
+@app.get("/")
+async def root():
+    return {"message": "FastAPI backend is running!", "endpoints": ["/api/health", "/api/chat"]}
+
 # Define a health check endpoint to verify API status
 @app.get("/api/health")
 async def health_check():
@@ -99,6 +104,11 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     # Start the server on all network interfaces (0.0.0.0) on the specified port
     uvicorn.run(app, host="0.0.0.0", port=port)
+
+# For Railway deployment - ensure the app is accessible
+if __name__ != "__main__":
+    # This ensures the app is available when imported
+    pass
 
 # For Vercel serverless functions
 # Export the FastAPI app for Vercel
