@@ -46,7 +46,7 @@ export default function ChatInterface() {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'system',
-        content: 'API Key is missing. Add the key in settings',
+        content: 'Oops! You need to add your OpenAI API key first. Click the Settings button to get started.',
         timestamp: new Date()
       }
       setMessages(prev => [...prev, errorMessage])
