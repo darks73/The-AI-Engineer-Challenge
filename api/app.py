@@ -96,6 +96,16 @@ async def root():
 async def health_check():
     return {"status": "ok"}
 
+# Railway often expects a /health endpoint
+@app.get("/health")
+async def health():
+    return {"status": "ok", "service": "fastapi"}
+
+# Add a simple test endpoint
+@app.get("/test")
+async def test():
+    return {"test": "working", "port": os.environ.get("PORT", "not set")}
+
 # Entry point for running the application directly
 if __name__ == "__main__":
     import uvicorn
