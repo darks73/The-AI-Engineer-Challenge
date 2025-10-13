@@ -29,7 +29,7 @@ export default function ChatMessages({ messages, isLoading, userInitials, onRetr
   }, [messages, isLoading])
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="p-4 space-y-4 min-h-full">
       {messages.length === 0 && !isLoading && (
         <div className="flex flex-col items-center justify-center h-full text-center">
           <div className="text-2xl font-semibold text-dark-text mb-4">

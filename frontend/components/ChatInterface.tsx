@@ -258,7 +258,7 @@ export default function ChatInterface() {
       </div>
 
       {/* Chat Messages */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-y-auto chat-scroll">
         <ChatMessages 
           messages={messages} 
           isLoading={isLoading} 
