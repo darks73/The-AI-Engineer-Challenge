@@ -7,6 +7,7 @@ interface ChatSettings {
   apiKey: string
   developerMessage: string
   model: string
+  userInitials: string
 }
 
 interface SettingsModalProps {
@@ -100,6 +101,25 @@ export default function SettingsModal({ settings, onSave, onClose }: SettingsMod
               <option value="gpt-4">GPT-4</option>
               <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
             </select>
+          </div>
+
+          {/* User Initials */}
+          <div>
+            <label htmlFor="userInitials" className="block text-sm font-medium text-dark-text mb-2">
+              Your Initials
+            </label>
+            <input
+              type="text"
+              id="userInitials"
+              value={formData.userInitials}
+              onChange={(e) => handleChange('userInitials', e.target.value.toUpperCase())}
+              className="chat-input w-full"
+              placeholder="Enter your initials (e.g., JD)"
+              maxLength={3}
+            />
+            <p className="text-xs text-dark-text-secondary mt-1">
+              These will appear in your message bubbles instead of "U".
+            </p>
           </div>
 
           {/* Developer Message */}

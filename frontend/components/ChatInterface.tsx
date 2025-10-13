@@ -17,6 +17,7 @@ interface ChatSettings {
   apiKey: string
   developerMessage: string
   model: string
+  userInitials: string
 }
 
 export default function ChatInterface() {
@@ -26,7 +27,8 @@ export default function ChatInterface() {
   const [settings, setSettings] = useState<ChatSettings>({
     apiKey: '',
     developerMessage: 'You are a helpful AI assistant.',
-    model: 'gpt-4.1-mini'
+    model: 'gpt-4.1-mini',
+    userInitials: 'U'
   })
 
   const handleSendMessage = async (content: string) => {
@@ -155,7 +157,7 @@ export default function ChatInterface() {
 
       {/* Chat Messages */}
       <div className="flex-1 overflow-hidden">
-        <ChatMessages messages={messages} isLoading={isLoading} />
+        <ChatMessages messages={messages} isLoading={isLoading} userInitials={settings.userInitials} />
       </div>
 
       {/* Chat Input */}

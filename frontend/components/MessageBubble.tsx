@@ -12,9 +12,10 @@ interface Message {
 
 interface MessageBubbleProps {
   message: Message
+  userInitials: string
 }
 
-export default function MessageBubble({ message }: MessageBubbleProps) {
+export default function MessageBubble({ message, userInitials }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false)
   const [displayContent, setDisplayContent] = useState('')
 
@@ -66,7 +67,7 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
               ? 'bg-accent text-white' 
               : 'bg-dark-surface border border-dark-border text-dark-text'
           }`}>
-            {message.role === 'user' ? 'U' : 'AI'}
+            {message.role === 'user' ? userInitials : 'AI'}
           </div>
 
           {/* Message content */}
