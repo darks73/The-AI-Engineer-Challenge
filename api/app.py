@@ -101,4 +101,5 @@ if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=port)
 
 # For Vercel serverless functions
-# Vercel will automatically detect the FastAPI app
+# Export the FastAPI app for Vercel
+__all__ = ["app"]
