@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Copy, Check } from 'lucide-react'
+import { Copy, Check, RotateCcw, Clock, CheckCircle, XCircle } from 'lucide-react'
 
 interface Message {
   id: string
@@ -9,14 +9,16 @@ interface Message {
   content: string
   timestamp: Date
   attachments?: File[]
+  status?: 'pending' | 'sent' | 'failed'
 }
 
 interface MessageBubbleProps {
   message: Message
   userInitials: string
+  onRetryMessage: (message: Message) => void
 }
 
-export default function MessageBubble({ message, userInitials }: MessageBubbleProps) {
+export default function MessageBubble({ message, userInitials, onRetryMessage }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false)
   const [displayContent, setDisplayContent] = useState('')
   const [imageUrls, setImageUrls] = useState<string[]>([])
@@ -117,17 +119,46 @@ export default function MessageBubble({ message, userInitials }: MessageBubblePr
                 </div>
               )}
               
-              {/* Copy button */}
-              <button
-                onClick={handleCopy}
-                className={`absolute top-2 right-2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
-                  message.role === 'user'
-                    ? 'text-white/70 hover:text-white'
-                    : 'text-dark-text-secondary hover:text-dark-text'
-                }`}
-              >
-                {copied ? <Check size={14} /> : <Copy size={14} />}
-              </button>
+              {/* Status indicator and actions */}
+              <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                {/* Status indicator */}
+                {message.role === 'user' && message.status && (
+                  <div className="flex items-center">
+                    {message.status === 'pending' && (
+                      <Clock size={12} className="text-blue-400 animate-pulse" />
+                    )}
+                    {message.status === 'sent' && (
+                      <CheckCircle size={12} className="text-green-400" />
+                    )}
+                    {message.status === 'failed' && (
+                      <XCircle size={12} className="text-red-400" />
+                    )}
+                  </div>
+                )}
+                
+                {/* Copy button */}
+                <button
+                  onClick={handleCopy}
+                  className={`p-1 rounded ${
+                    message.role === 'user'
+                      ? 'text-white/70 hover:text-white'
+                      : 'text-dark-text-secondary hover:text-dark-text'
+                  }`}
+                >
+                  {copied ? <Check size={14} /> : <Copy size={14} />}
+                </button>
+                
+                {/* Retry button for failed messages */}
+                {message.role === 'user' && message.status === 'failed' && (
+                  <button
+                    onClick={() => onRetryMessage(message)}
+                    className="p-1 rounded text-red-400 hover:text-red-300 transition-colors duration-200"
+                    title="Retry message"
+                  >
+                    <RotateCcw size={14} />
+                  </button>
+                )}
+              </div>
             </div>
             
             {/* Timestamp */}

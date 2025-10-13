@@ -12,6 +12,7 @@ interface Message {
   content: string
   timestamp: Date
   attachments?: File[]
+  status?: 'pending' | 'sent' | 'failed'
 }
 
 interface ChatSettings {
@@ -41,7 +42,8 @@ export default function ChatInterface() {
       role: 'user',
       content: content.trim(),
       timestamp: new Date(),
-      attachments: attachments.length > 0 ? [...attachments] : undefined
+      attachments: attachments.length > 0 ? [...attachments] : undefined,
+      status: 'pending'
     }
 
     setMessages(prev => [...prev, userMessage])
@@ -49,6 +51,13 @@ export default function ChatInterface() {
 
     // Check if API key is missing
     if (!settings.apiKey.trim()) {
+      // Mark user message as failed
+      setMessages(prev => prev.map(msg => 
+        msg.id === userMessage.id 
+          ? { ...msg, status: 'failed' as const }
+          : msg
+      ))
+      
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'system',
@@ -62,6 +71,13 @@ export default function ChatInterface() {
     setIsLoading(true)
 
     try {
+      // Mark user message as sent
+      setMessages(prev => prev.map(msg => 
+        msg.id === userMessage.id 
+          ? { ...msg, status: 'sent' as const }
+          : msg
+      ))
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -115,6 +131,14 @@ export default function ChatInterface() {
 
     } catch (error) {
       console.error('Error sending message:', error)
+      
+      // Mark user message as failed
+      setMessages(prev => prev.map(msg => 
+        msg.id === userMessage.id 
+          ? { ...msg, status: 'failed' as const }
+          : msg
+      ))
+      
       const errorMessage: Message = {
         id: (Date.now() + 2).toString(),
         role: 'assistant',
@@ -162,6 +186,25 @@ export default function ChatInterface() {
     setAttachments(prev => prev.filter((_, i) => i !== index))
   }
 
+  const handleRetryMessage = async (message: Message) => {
+    if (message.role !== 'user') return
+    
+    // Reset message status to pending
+    setMessages(prev => prev.map(msg => 
+      msg.id === message.id 
+        ? { ...msg, status: 'pending' as const }
+        : msg
+    ))
+
+    // Remove any error messages that might be related to this message
+    setMessages(prev => prev.filter(msg => 
+      !(msg.role === 'assistant' && msg.content.startsWith('Error:'))
+    ))
+
+    // Retry sending the message
+    await handleSendMessage(message.content)
+  }
+
   return (
     <div className="flex flex-col h-screen max-w-4xl mx-auto">
       {/* Header */}
@@ -187,7 +230,12 @@ export default function ChatInterface() {
 
       {/* Chat Messages */}
       <div className="flex-1 overflow-hidden">
-        <ChatMessages messages={messages} isLoading={isLoading} userInitials={settings.userInitials} />
+        <ChatMessages 
+          messages={messages} 
+          isLoading={isLoading} 
+          userInitials={settings.userInitials}
+          onRetryMessage={handleRetryMessage}
+        />
       </div>
 
       {/* Chat Input */}

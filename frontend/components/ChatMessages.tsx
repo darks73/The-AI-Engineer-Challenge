@@ -14,9 +14,10 @@ interface ChatMessagesProps {
   messages: Message[]
   isLoading: boolean
   userInitials: string
+  onRetryMessage: (message: Message) => void
 }
 
-export default function ChatMessages({ messages, isLoading, userInitials }: ChatMessagesProps) {
+export default function ChatMessages({ messages, isLoading, userInitials, onRetryMessage }: ChatMessagesProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -38,7 +39,12 @@ export default function ChatMessages({ messages, isLoading, userInitials }: Chat
       )}
 
       {messages.map((message) => (
-        <MessageBubble key={message.id} message={message} userInitials={userInitials} />
+        <MessageBubble 
+          key={message.id} 
+          message={message} 
+          userInitials={userInitials}
+          onRetryMessage={onRetryMessage}
+        />
       ))}
 
       {isLoading && (
