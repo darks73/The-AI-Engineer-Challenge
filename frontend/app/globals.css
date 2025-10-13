@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-dark-bg text-dark-text;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  .chat-input {
+    @apply w-full bg-dark-surface border border-dark-border rounded-lg px-4 py-3 text-dark-text placeholder-dark-text-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent resize-none;
+  }
+  
+  .chat-button {
+    @apply bg-accent hover:bg-accent-hover text-white px-4 py-2 rounded-lg transition-colors duration-200 font-medium;
+  }
+  
+  .chat-button-secondary {
+    @apply bg-dark-surface hover:bg-dark-border border border-dark-border text-dark-text px-4 py-2 rounded-lg transition-colors duration-200 font-medium;
+  }
+}
