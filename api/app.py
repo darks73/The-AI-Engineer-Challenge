@@ -1,5 +1,5 @@
 # Import required FastAPI components for building the API
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 # Import Pydantic for data validation and settings management
@@ -7,7 +7,9 @@ from pydantic import BaseModel
 # Import OpenAI client for interacting with OpenAI's API
 from openai import OpenAI
 import os
-from typing import Optional
+import base64
+import io
+from typing import Optional, List
 
 # Initialize FastAPI application with a title
 app = FastAPI(title="OpenAI Chat API")
@@ -27,8 +29,9 @@ app.add_middleware(
 class ChatRequest(BaseModel):
     developer_message: str  # Message from the developer/system
     user_message: str      # Message from the user
-    model: Optional[str] = "gpt-4.1-mini"  # Optional model selection with default
+    model: Optional[str] = "gpt-4o-mini"  # Updated to support vision
     api_key: str          # OpenAI API key for authentication
+    images: Optional[List[str]] = None  # Base64 encoded images
 
 # Define the main chat endpoint that handles POST requests
 @app.post("/api/chat")
@@ -39,14 +42,35 @@ async def chat(request: ChatRequest):
         
         # Create an async generator function for streaming responses
         async def generate():
+            # Prepare messages array
+            messages = [
+                {"role": "system", "content": request.developer_message}
+            ]
+            
+            # Prepare user message content
+            user_content = [{"type": "text", "text": request.user_message}]
+            
+            # Add images if provided
+            if request.images:
+                for image_base64 in request.images:
+                    user_content.append({
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{image_base64}"
+                        }
+                    })
+            
+            messages.append({
+                "role": "user",
+                "content": user_content
+            })
+            
             # Create a streaming chat completion request
             stream = client.chat.completions.create(
                 model=request.model,
-                messages=[
-                    {"role": "developer", "content": request.developer_message},
-                    {"role": "user", "content": request.user_message}
-                ],
-                stream=True  # Enable streaming response
+                messages=messages,
+                stream=True,  # Enable streaming response
+                max_tokens=4000  # Increase token limit for vision
             )
             
             # Yield each chunk of the response as it becomes available

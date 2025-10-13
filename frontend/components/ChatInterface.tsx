@@ -30,7 +30,7 @@ export default function ChatInterface() {
   const [settings, setSettings] = useState<ChatSettings>({
     apiKey: '',
     developerMessage: 'You are a helpful AI assistant.',
-    model: 'gpt-4.1-mini',
+    model: 'gpt-4o-mini',
     userInitials: 'U'
   })
 
@@ -78,6 +78,19 @@ export default function ChatInterface() {
           : msg
       ))
 
+      // Convert images to base64
+      const imageBase64s: string[] = []
+      if (userMessage.attachments) {
+        for (const file of userMessage.attachments) {
+          try {
+            const base64 = await fileToBase64(file)
+            imageBase64s.push(base64)
+          } catch (error) {
+            console.error('Error converting image to base64:', error)
+          }
+        }
+      }
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -87,7 +100,8 @@ export default function ChatInterface() {
           developer_message: settings.developerMessage,
           user_message: content.trim(),
           model: settings.model,
-          api_key: settings.apiKey
+          api_key: settings.apiKey,
+          images: imageBase64s.length > 0 ? imageBase64s : undefined
         })
       })
 
@@ -184,6 +198,21 @@ export default function ChatInterface() {
 
   const removeAttachment = (index: number) => {
     setAttachments(prev => prev.filter((_, i) => i !== index))
+  }
+
+  // Helper function to convert file to base64
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => {
+        const result = reader.result as string
+        // Remove the data:image/...;base64, prefix
+        const base64 = result.split(',')[1]
+        resolve(base64)
+      }
+      reader.onerror = error => reject(error)
+    })
   }
 
   const handleRetryMessage = async (message: Message) => {

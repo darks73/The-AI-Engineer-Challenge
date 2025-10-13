@@ -97,7 +97,9 @@ export default function SettingsModal({ settings, onSave, onClose }: SettingsMod
               onChange={(e) => handleChange('model', e.target.value)}
               className="chat-input w-full"
             >
-              <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
+              <option value="gpt-4o-mini">GPT-4o Mini (Supports Images)</option>
+              <option value="gpt-4o">GPT-4o (Supports Images)</option>
+              <option value="gpt-4-turbo">GPT-4 Turbo (Supports Images)</option>
               <option value="gpt-4">GPT-4</option>
               <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
             </select>
