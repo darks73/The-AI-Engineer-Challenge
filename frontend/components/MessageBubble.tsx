@@ -8,6 +8,7 @@ interface Message {
   role: 'user' | 'assistant' | 'system'
   content: string
   timestamp: Date
+  attachments?: File[]
 }
 
 interface MessageBubbleProps {
@@ -18,11 +19,27 @@ interface MessageBubbleProps {
 export default function MessageBubble({ message, userInitials }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false)
   const [displayContent, setDisplayContent] = useState('')
+  const [imageUrls, setImageUrls] = useState<string[]>([])
 
   // Set display content directly
   useEffect(() => {
     setDisplayContent(message.content)
   }, [message.content])
+
+  // Create object URLs for attachments
+  useEffect(() => {
+    if (message.attachments && message.attachments.length > 0) {
+      const urls = message.attachments.map(file => URL.createObjectURL(file))
+      setImageUrls(urls)
+      
+      // Cleanup function to revoke object URLs
+      return () => {
+        urls.forEach(url => URL.revokeObjectURL(url))
+      }
+    } else {
+      setImageUrls([])
+    }
+  }, [message.attachments])
 
   const handleCopy = async () => {
     try {
@@ -77,9 +94,28 @@ export default function MessageBubble({ message, userInitials }: MessageBubblePr
                 ? 'bg-accent text-white'
                 : 'bg-dark-surface border border-dark-border text-dark-text'
             }`}>
-              <div className="whitespace-pre-wrap break-words">
-                {displayContent}
-              </div>
+              {/* Display attachments */}
+              {imageUrls.length > 0 && (
+                <div className="mb-3 flex flex-wrap gap-2">
+                  {imageUrls.map((url, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={url}
+                        alt={`Attachment ${index + 1}`}
+                        className="max-w-48 max-h-48 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => window.open(url, '_blank')}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {/* Display text content */}
+              {displayContent && (
+                <div className="whitespace-pre-wrap break-words">
+                  {displayContent}
+                </div>
+              )}
               
               {/* Copy button */}
               <button

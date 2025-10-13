@@ -11,6 +11,7 @@ interface Message {
   role: 'user' | 'assistant' | 'system'
   content: string
   timestamp: Date
+  attachments?: File[]
 }
 
 interface ChatSettings {
@@ -24,6 +25,7 @@ export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [attachments, setAttachments] = useState<File[]>([])
   const [settings, setSettings] = useState<ChatSettings>({
     apiKey: '',
     developerMessage: 'You are a helpful AI assistant.',
@@ -38,10 +40,12 @@ export default function ChatInterface() {
       id: Date.now().toString(),
       role: 'user',
       content: content.trim(),
-      timestamp: new Date()
+      timestamp: new Date(),
+      attachments: attachments.length > 0 ? [...attachments] : undefined
     }
 
     setMessages(prev => [...prev, userMessage])
+    setAttachments([]) // Clear attachments after sending
 
     // Check if API key is missing
     if (!settings.apiKey.trim()) {
@@ -132,6 +136,32 @@ export default function ChatInterface() {
     setShowSettings(false)
   }
 
+  const handleFileUpload = (files: File[]) => {
+    // Validate file types
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+    const validFiles = files.filter(file => allowedTypes.includes(file.type))
+    
+    if (validFiles.length !== files.length) {
+      alert('Please only upload image files (JPEG, PNG, GIF, WebP)')
+      return
+    }
+
+    // Check file sizes (max 10MB per file)
+    const maxSize = 10 * 1024 * 1024 // 10MB
+    const oversizedFiles = validFiles.filter(file => file.size > maxSize)
+    
+    if (oversizedFiles.length > 0) {
+      alert('File size must be less than 10MB')
+      return
+    }
+
+    setAttachments(prev => [...prev, ...validFiles])
+  }
+
+  const removeAttachment = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index))
+  }
+
   return (
     <div className="flex flex-col h-screen max-w-4xl mx-auto">
       {/* Header */}
@@ -162,7 +192,13 @@ export default function ChatInterface() {
 
       {/* Chat Input */}
       <div className="p-4 border-t border-dark-border">
-        <ChatInput onSendMessage={handleSendMessage} disabled={isLoading} />
+        <ChatInput 
+          onSendMessage={handleSendMessage} 
+          disabled={isLoading}
+          attachments={attachments}
+          onFileUpload={handleFileUpload}
+          onRemoveAttachment={removeAttachment}
+        />
       </div>
 
       {/* Settings Modal */}

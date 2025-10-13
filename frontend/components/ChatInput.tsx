@@ -1,14 +1,17 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Mic, Send } from 'lucide-react'
+import { Mic, Send, Paperclip, X, Image } from 'lucide-react'
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void
   disabled?: boolean
+  attachments: File[]
+  onFileUpload: (files: File[]) => void
+  onRemoveAttachment: (index: number) => void
 }
 
-export default function ChatInput({ onSendMessage, disabled = false }: ChatInputProps) {
+export default function ChatInput({ onSendMessage, disabled = false, attachments, onFileUpload, onRemoveAttachment }: ChatInputProps) {
   const [message, setMessage] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -32,6 +35,15 @@ export default function ChatInput({ onSendMessage, disabled = false }: ChatInput
     alert('Voice input not implemented yet')
   }
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    if (files.length > 0) {
+      onFileUpload(files)
+    }
+    // Reset the input value so the same file can be selected again
+    e.target.value = ''
+  }
+
   // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
@@ -42,15 +54,48 @@ export default function ChatInput({ onSendMessage, disabled = false }: ChatInput
 
   return (
     <div className="w-full max-w-4xl mx-auto">
+      {/* Attachment previews */}
+      {attachments.length > 0 && (
+        <div className="mb-4 flex flex-wrap gap-2">
+          {attachments.map((file, index) => (
+            <div key={index} className="relative bg-dark-surface border border-dark-border rounded-lg p-3 flex items-center gap-2">
+              <Image size={16} className="text-dark-text-secondary" />
+              <span className="text-dark-text text-sm truncate max-w-32">
+                {file.name}
+              </span>
+              <button
+                type="button"
+                onClick={() => onRemoveAttachment(index)}
+                className="text-dark-text-secondary hover:text-red-400 transition-colors duration-200"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="relative">
         <div className="flex items-end gap-2 bg-dark-surface border border-dark-border rounded-xl p-3 focus-within:ring-2 focus-within:ring-accent focus-within:border-transparent">
-          {/* Add button - placeholder for now */}
-          <button
-            type="button"
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-dark-bg hover:bg-dark-border text-dark-text-secondary hover:text-dark-text transition-colors duration-200 text-sm font-medium"
-          >
-            Add
-          </button>
+          {/* Add button with file upload */}
+          <div className="relative">
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFileSelect}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              disabled={disabled}
+            />
+            <button
+              type="button"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-dark-bg hover:bg-dark-border text-dark-text-secondary hover:text-dark-text transition-colors duration-200 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={disabled}
+            >
+              <Paperclip size={16} />
+              Add
+            </button>
+          </div>
 
           {/* Main input area */}
           <div className="flex-1 relative">
