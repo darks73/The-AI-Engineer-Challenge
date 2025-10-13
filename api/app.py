@@ -9,6 +9,7 @@ from openai import OpenAI
 import os
 import base64
 import io
+import asyncio
 from typing import Optional, List
 
 # Initialize FastAPI application with a title
