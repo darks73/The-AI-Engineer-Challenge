@@ -8,7 +8,7 @@ import { Plus, Settings } from 'lucide-react'
 
 interface Message {
   id: string
-  role: 'user' | 'assistant'
+  role: 'user' | 'assistant' | 'system'
   content: string
   timestamp: Date
 }
@@ -30,7 +30,7 @@ export default function ChatInterface() {
   })
 
   const handleSendMessage = async (content: string) => {
-    if (!content.trim() || !settings.apiKey) return
+    if (!content.trim()) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -40,6 +40,19 @@ export default function ChatInterface() {
     }
 
     setMessages(prev => [...prev, userMessage])
+
+    // Check if API key is missing
+    if (!settings.apiKey.trim()) {
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'system',
+        content: 'API Key is missing. Add the key in settings',
+        timestamp: new Date()
+      }
+      setMessages(prev => [...prev, errorMessage])
+      return
+    }
+
     setIsLoading(true)
 
     try {

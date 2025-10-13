@@ -5,7 +5,7 @@ import { Copy, Check } from 'lucide-react'
 
 interface Message {
   id: string
-  role: 'user' | 'assistant'
+  role: 'user' | 'assistant' | 'system'
   content: string
   timestamp: Date
 }
@@ -35,6 +35,25 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
 
   const formatTimestamp = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  }
+
+  // Handle system messages differently
+  if (message.role === 'system') {
+    return (
+      <div className="flex justify-center">
+        <div className="bg-red-900/20 border border-red-500/30 rounded-xl p-4 max-w-3xl">
+          <div className="text-red-400 text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <span className="text-sm font-medium">System Message</span>
+            </div>
+            <div className="text-red-300 font-medium">
+              {displayContent}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
