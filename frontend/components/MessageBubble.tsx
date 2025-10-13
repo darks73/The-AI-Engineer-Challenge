@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { Copy, Check, RotateCcw, Clock, CheckCircle, XCircle } from 'lucide-react'
 
 interface Message {
@@ -101,11 +102,14 @@ export default function MessageBubble({ message, userInitials, onRetryMessage }:
                 <div className="mb-3 flex flex-wrap gap-2">
                   {imageUrls.map((url, index) => (
                     <div key={index} className="relative">
-                      <img
+                      <Image
                         src={url}
                         alt={`Attachment ${index + 1}`}
+                        width={192}
+                        height={192}
                         className="max-w-48 max-h-48 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
                         onClick={() => window.open(url, '_blank')}
+                        unoptimized
                       />
                     </div>
                   ))}

@@ -120,7 +120,7 @@ export default function SettingsModal({ settings, onSave, onClose }: SettingsMod
               maxLength={3}
             />
             <p className="text-xs text-dark-text-secondary mt-1">
-              These will appear in your message bubbles instead of "U".
+              These will appear in your message bubbles instead of &quot;U&quot;.
             </p>
           </div>
 
