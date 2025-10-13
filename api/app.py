@@ -117,11 +117,5 @@ if __name__ == "__main__":
     # Start the server on all network interfaces (0.0.0.0) on the specified port
     uvicorn.run(app, host="0.0.0.0", port=port)
 
-# For Railway deployment - ensure the app is accessible
-if __name__ != "__main__":
-    # This ensures the app is available when imported
-    pass
-
-# For Vercel serverless functions
-# Export the FastAPI app for Vercel
-__all__ = ["app"]
+# For Railway deployment with Gunicorn
+# The app is automatically available when imported
