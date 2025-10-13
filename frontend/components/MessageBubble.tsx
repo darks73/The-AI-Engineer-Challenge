@@ -18,25 +18,10 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false)
   const [displayContent, setDisplayContent] = useState('')
 
-  // For streaming effect on assistant messages
+  // Set display content directly
   useEffect(() => {
-    if (message.role === 'assistant' && message.content) {
-      setDisplayContent('')
-      let index = 0
-      const interval = setInterval(() => {
-        if (index < message.content.length) {
-          setDisplayContent(prev => prev + message.content[index])
-          index++
-        } else {
-          clearInterval(interval)
-        }
-      }, 10) // Adjust speed as needed
-
-      return () => clearInterval(interval)
-    } else {
-      setDisplayContent(message.content)
-    }
-  }, [message.content, message.role])
+    setDisplayContent(message.content)
+  }, [message.content])
 
   const handleCopy = async () => {
     try {
@@ -74,9 +59,6 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
             }`}>
               <div className="whitespace-pre-wrap break-words">
                 {displayContent}
-                {message.role === 'assistant' && displayContent.length < message.content.length && (
-                  <span className="inline-block w-2 h-4 bg-dark-text ml-1 animate-pulse"></span>
-                )}
               </div>
               
               {/* Copy button */}

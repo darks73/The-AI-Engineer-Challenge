@@ -79,32 +79,19 @@ export default function ChatInterface() {
         const { done, value } = await reader.read()
         if (done) break
 
-        buffer += new TextDecoder().decode(value)
-        const lines = buffer.split('\n')
-        buffer = lines.pop() || ''
-
-        for (const line of lines) {
-          if (line.trim()) {
-            setMessages(prev => 
-              prev.map(msg => 
-                msg.id === assistantMessage.id 
-                  ? { ...msg, content: msg.content + line }
-                  : msg
-              )
+        const chunk = new TextDecoder().decode(value)
+        if (chunk) {
+          buffer += chunk
+          
+          // Update the message content with the current buffer
+          setMessages(prev => 
+            prev.map(msg => 
+              msg.id === assistantMessage.id 
+                ? { ...msg, content: buffer }
+                : msg
             )
-          }
-        }
-      }
-
-      // Add any remaining buffer content
-      if (buffer.trim()) {
-        setMessages(prev => 
-          prev.map(msg => 
-            msg.id === assistantMessage.id 
-              ? { ...msg, content: msg.content + buffer }
-              : msg
           )
-        )
+        }
       }
 
     } catch (error) {
