@@ -59,7 +59,7 @@ export default function ChatInput({ onSendMessage, disabled = false, attachments
         <div className="mb-4 flex flex-wrap gap-2">
           {attachments.map((file, index) => (
             <div key={index} className="relative bg-dark-surface border border-dark-border rounded-lg p-3 flex items-center gap-2">
-              <Image size={16} className="text-dark-text-secondary" alt="File attachment" />
+              <Image size={16} className="text-dark-text-secondary" />
               <span className="text-dark-text text-sm truncate max-w-32">
                 {file.name}
               </span>
