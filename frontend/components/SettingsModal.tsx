@@ -61,7 +61,7 @@ export default function SettingsModal({ settings, onSave, onClose }: SettingsMod
           {/* API Key */}
           <div>
             <label htmlFor="apiKey" className="block text-sm font-medium text-dark-text mb-2">
-              OpenAI API Key *
+              OpenAI API Key (Optional)
             </label>
             <div className="relative">
               <input
@@ -70,8 +70,7 @@ export default function SettingsModal({ settings, onSave, onClose }: SettingsMod
                 value={formData.apiKey}
                 onChange={(e) => handleChange('apiKey', e.target.value)}
                 className="chat-input w-full pr-10"
-                placeholder="Enter your OpenAI API key"
-                required
+                placeholder="Enter your OpenAI API key (or leave blank to use default)"
               />
               <button
                 type="button"
@@ -82,7 +81,7 @@ export default function SettingsModal({ settings, onSave, onClose }: SettingsMod
               </button>
             </div>
             <p className="text-xs text-dark-text-secondary mt-1">
-              Your API key is stored locally and never shared with our servers.
+              Your API key is stored locally and never shared with our servers. Leave blank to use the default key configured on the server.
             </p>
           </div>
 

@@ -106,25 +106,6 @@ export default function ChatInterface() {
     setMessages(prev => [...prev, userMessage])
     setAttachments([]) // Clear attachments after sending
 
-    // Check if API key is missing
-    if (!settings.apiKey.trim()) {
-      // Mark user message as failed
-      setMessages(prev => prev.map(msg => 
-        msg.id === userMessage.id 
-          ? { ...msg, status: 'failed' as const }
-          : msg
-      ))
-      
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'system',
-        content: 'Oops! You need to add your OpenAI API key first. Click the Settings button to get started.',
-        timestamp: new Date()
-      }
-      setMessages(prev => [...prev, errorMessage])
-      return
-    }
-
     setIsLoading(true)
 
     try {
@@ -159,7 +140,7 @@ export default function ChatInterface() {
           developer_message: settings.developerMessage,
           user_message: content.trim(),
           model: settings.model,
-          api_key: settings.apiKey,
+          api_key: settings.apiKey.trim() || null,
           images: imageBase64s.length > 0 ? imageBase64s : undefined
         })
       })

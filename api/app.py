@@ -50,15 +50,24 @@ class ChatRequest(BaseModel):
     developer_message: str  # Message from the developer/system
     user_message: str      # Message from the user
     model: Optional[str] = "gpt-4o-mini"  # Updated to support vision
-    api_key: str          # OpenAI API key for authentication
+    api_key: Optional[str] = None  # OpenAI API key for authentication (optional, can use default)
     images: Optional[List[str]] = None  # Base64 encoded images
 
 # Define the main chat endpoint that handles POST requests
 @app.post("/api/chat")
 async def chat(request: ChatRequest, current_user: dict = Depends(get_current_user)):
     try:
-        # Initialize OpenAI client with the provided API key
-        client = OpenAI(api_key=request.api_key)
+        # Use provided API key or fall back to environment variable
+        api_key = request.api_key or os.environ.get("OPENAI_API_KEY")
+        
+        if not api_key:
+            raise HTTPException(
+                status_code=400, 
+                detail="No OpenAI API key provided. Either set one in settings or configure OPENAI_API_KEY environment variable."
+            )
+        
+        # Initialize OpenAI client with the API key
+        client = OpenAI(api_key=api_key)
         
         # Create an async generator function for streaming responses
         async def generate():
