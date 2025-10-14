@@ -255,14 +255,19 @@ class OIDCAuthService {
       logoutUrl.searchParams.set('id_token_hint', this.token);
     }
     
-    console.log('🚪 Logout URL Details:');
-    console.log('  - Issuer:', OIDC_CONFIG.issuer);
-    console.log('  - Logout endpoint:', `${OIDC_CONFIG.issuer}/v1/logout`);
-    console.log('  - Post logout redirect URI:', window.location.origin);
-    console.log('  - ID token hint:', this.idToken ? 'ID Token Present' : (this.token ? 'Access Token (fallback)' : 'Missing'));
-    console.log('  - Full logout URL:', logoutUrl.toString());
+    // Use console.warn for better visibility and persistence
+    console.warn('🚪 LOGOUT URL DETAILS (will redirect in 3 seconds):');
+    console.warn('  - Issuer:', OIDC_CONFIG.issuer);
+    console.warn('  - Logout endpoint:', `${OIDC_CONFIG.issuer}/v1/logout`);
+    console.warn('  - Post logout redirect URI:', window.location.origin);
+    console.warn('  - ID token hint:', this.idToken ? 'ID Token Present' : (this.token ? 'Access Token (fallback)' : 'Missing'));
+    console.warn('  - Full logout URL:', logoutUrl.toString());
     
-    window.location.href = logoutUrl.toString();
+    // Add a delay so you can see the logs before redirect
+    console.warn('⏳ Redirecting to logout in 3 seconds...');
+    setTimeout(() => {
+      window.location.href = logoutUrl.toString();
+    }, 3000);
   }
 
   async refreshAccessToken(): Promise<boolean> {
