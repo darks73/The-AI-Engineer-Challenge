@@ -130,6 +130,7 @@ export default function ChatInterface() {
       }
 
           const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api/chat'
+          console.log('🔍 DEBUG: Frontend API URL:', apiUrl)
           const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
