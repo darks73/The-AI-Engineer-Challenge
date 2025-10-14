@@ -75,7 +75,7 @@ export default function ChatInterface() {
   const [attachments, setAttachments] = useState<File[]>([])
   const [settings, setSettings] = useState<ChatSettings>({
     apiKey: '',
-    developerMessage: 'You are a helpful AI assistant.',
+    developerMessage: 'You are a joyful AI assistant.',
     model: 'gpt-4o-mini',
     userInitials: 'U'
   })
