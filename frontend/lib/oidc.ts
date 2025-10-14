@@ -42,6 +42,7 @@ class OIDCAuthService {
     if (typeof window !== 'undefined') {
       this.token = localStorage.getItem('oidc_token');
       this.refreshToken = localStorage.getItem('oidc_refresh_token');
+      this.idToken = localStorage.getItem('oidc_id_token');
       this.user = this.getStoredUser();
     }
   }
@@ -63,7 +64,7 @@ class OIDCAuthService {
     }
   }
 
-  private setStoredToken(token: string | null, refreshToken?: string | null): void {
+  private setStoredToken(token: string | null, refreshToken?: string | null, idToken?: string | null): void {
     if (typeof window === 'undefined') return;
     
     if (token) {
@@ -76,6 +77,12 @@ class OIDCAuthService {
       localStorage.setItem('oidc_refresh_token', refreshToken);
     } else {
       localStorage.removeItem('oidc_refresh_token');
+    }
+    
+    if (idToken) {
+      localStorage.setItem('oidc_id_token', idToken);
+    } else {
+      localStorage.removeItem('oidc_id_token');
     }
   }
 
@@ -208,6 +215,9 @@ class OIDCAuthService {
       } else {
         console.warn('❌ No ID token in response - using access token as fallback for logout');
       }
+      
+      // Store all tokens in localStorage
+      this.setStoredToken(this.token, this.refreshToken, this.idToken);
 
       // Get user info
       console.log('Getting user info...');
@@ -247,7 +257,7 @@ class OIDCAuthService {
     this.idToken = null;
     this.user = null;
     
-    this.setStoredToken(null, null);
+    this.setStoredToken(null, null, null);
     this.setStoredUser(null);
 
     this.notifyListeners();
@@ -257,11 +267,17 @@ class OIDCAuthService {
     logoutUrl.searchParams.set('post_logout_redirect_uri', window.location.origin);
     
     // Add id_token_hint if we have an ID token
+    console.warn('🔍 LOGOUT TOKEN CHECK:');
+    console.warn('  - ID token available:', !!this.idToken);
+    console.warn('  - Access token available:', !!this.token);
+    
     if (this.idToken) {
       logoutUrl.searchParams.set('id_token_hint', this.idToken);
+      console.warn('✅ Using ID token as id_token_hint');
     } else if (this.token) {
       // Fallback to access token if no ID token available
       logoutUrl.searchParams.set('id_token_hint', this.token);
+      console.warn('⚠️ Using access token as id_token_hint (fallback)');
     }
     
     // Use console.warn for better visibility and persistence
@@ -304,8 +320,10 @@ class OIDCAuthService {
       const tokenData = await response.json();
       this.token = tokenData.access_token;
       this.refreshToken = tokenData.refresh_token || this.refreshToken;
+      // Keep existing ID token (refresh doesn't typically return a new ID token)
+      // this.idToken remains unchanged
 
-      this.setStoredToken(this.token, this.refreshToken);
+      this.setStoredToken(this.token, this.refreshToken, this.idToken);
       this.notifyListeners();
 
       return true;
