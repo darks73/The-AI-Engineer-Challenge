@@ -33,6 +33,7 @@ export interface AuthState {
 class OIDCAuthService {
   private token: string | null = null;
   private refreshToken: string | null = null;
+  private idToken: string | null = null;
   private user: UserInfo | null = null;
   private listeners: ((state: AuthState) => void)[] = [];
 
@@ -190,6 +191,14 @@ class OIDCAuthService {
       const tokenData = await tokenResponse.json();
       this.token = tokenData.access_token;
       this.refreshToken = tokenData.refresh_token;
+      
+      // Store ID token if present (needed for logout)
+      if (tokenData.id_token) {
+        this.idToken = tokenData.id_token;
+        console.log('ID token received and stored');
+      } else {
+        console.log('No ID token in response');
+      }
 
       // Get user info
       console.log('Getting user info...');
@@ -226,6 +235,7 @@ class OIDCAuthService {
   async logout(): Promise<void> {
     this.token = null;
     this.refreshToken = null;
+    this.idToken = null;
     this.user = null;
     
     this.setStoredToken(null, null);
@@ -236,6 +246,22 @@ class OIDCAuthService {
     // Redirect to OIDC logout
     const logoutUrl = new URL(`${OIDC_CONFIG.issuer}/v1/logout`);
     logoutUrl.searchParams.set('post_logout_redirect_uri', window.location.origin);
+    
+    // Add id_token_hint if we have an ID token
+    if (this.idToken) {
+      logoutUrl.searchParams.set('id_token_hint', this.idToken);
+    } else if (this.token) {
+      // Fallback to access token if no ID token available
+      logoutUrl.searchParams.set('id_token_hint', this.token);
+    }
+    
+    console.log('🚪 Logout URL Details:');
+    console.log('  - Issuer:', OIDC_CONFIG.issuer);
+    console.log('  - Logout endpoint:', `${OIDC_CONFIG.issuer}/v1/logout`);
+    console.log('  - Post logout redirect URI:', window.location.origin);
+    console.log('  - ID token hint:', this.idToken ? 'ID Token Present' : (this.token ? 'Access Token (fallback)' : 'Missing'));
+    console.log('  - Full logout URL:', logoutUrl.toString());
+    
     window.location.href = logoutUrl.toString();
   }
 
