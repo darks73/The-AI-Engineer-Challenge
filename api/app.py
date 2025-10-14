@@ -71,7 +71,7 @@ async def chat(request: ChatRequest, current_user: dict = Depends(get_current_us
         if not api_key:
             raise HTTPException(
                 status_code=400, 
-                detail="No OpenAI API key provided. Either set one in settings or configure OPENAI_API_KEY environment variable."
+                detail="❌ OpenAI API Key Required: No API key was provided in the request and no OPENAI_API_KEY environment variable is set. Please either: 1) Add your API key in the frontend settings, or 2) Set the OPENAI_API_KEY environment variable on the server. Get your API key from: https://platform.openai.com/api-keys"
             )
         
         # Initialize OpenAI client with the API key
@@ -125,7 +125,23 @@ async def chat(request: ChatRequest, current_user: dict = Depends(get_current_us
 # Define a root endpoint for testing
 @app.get("/")
 async def root():
-    return {"message": "FastAPI backend is running!", "endpoints": ["/api/health", "/api/chat"]}
+    return {"message": "FastAPI backend is running!", "endpoints": ["/api/health", "/api/chat", "/api/debug"]}
+
+# Debug endpoint to check environment variables
+@app.get("/api/debug")
+async def debug_env():
+    """Debug endpoint to check environment variable status"""
+    api_key_status = "SET" if os.environ.get("OPENAI_API_KEY") else "NOT SET"
+    api_key_preview = os.environ.get("OPENAI_API_KEY", "")[:20] + "..." if os.environ.get("OPENAI_API_KEY") else "None"
+    
+    return {
+        "OPENAI_API_KEY": {
+            "status": api_key_status,
+            "preview": api_key_preview,
+            "length": len(os.environ.get("OPENAI_API_KEY", "")) if os.environ.get("OPENAI_API_KEY") else 0
+        },
+        "all_env_vars": {k: v for k, v in os.environ.items() if "OPENAI" in k or "API" in k}
+    }
 
 # Define a health check endpoint to verify API status
 @app.get("/api/health")
