@@ -99,7 +99,6 @@ export default function ChatInterface() {
     console.log('🔐 Auth status check:', {
       isAuthenticated: oidcAuth.isAuthenticated(),
       hasToken: !!oidcAuth.getToken(),
-      hasRefreshToken: !!oidcAuth.getRefreshToken(),
       user: oidcAuth.getUser()
     })
     
