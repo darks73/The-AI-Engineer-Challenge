@@ -14,6 +14,7 @@ from functools import lru_cache
 
 # OIDC Configuration
 OIDC_CONFIG_URL = "https://mavericks-playground.gw.test.onewelcome.net/oauth/.well-known/openid-configuration"
+OIDC_CLIENT_ID = "348C95000A1FAD810C2640F8F79462539362DDDA744F4896EA840FD7FFE55C86"
 
 class OIDCAuthService:
     def __init__(self):
