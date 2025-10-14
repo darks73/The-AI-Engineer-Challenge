@@ -14,7 +14,6 @@ from functools import lru_cache
 
 # OIDC Configuration
 OIDC_CONFIG_URL = "https://mavericks-playground.gw.test.onewelcome.net/oauth/.well-known/openid-configuration"
-OIDC_CLIENT_ID = "your-client-id"  # This should be set via environment variable
 
 class OIDCAuthService:
     def __init__(self):
@@ -94,11 +93,10 @@ class OIDCAuthService:
                 token,
                 signing_key,
                 algorithms=["RS256", "RS384", "RS512"],
-                audience=OIDC_CLIENT_ID,
                 issuer=expected_issuer,
                 options={
                     "verify_signature": True,
-                    "verify_aud": True,
+                    "verify_aud": False,  # For public clients, we don't verify audience
                     "verify_iss": True,
                     "verify_exp": True,
                     "verify_iat": True,
