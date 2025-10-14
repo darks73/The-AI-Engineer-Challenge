@@ -28,6 +28,7 @@ export interface AuthState {
   user: UserInfo | null;
   token: string | null;
   refreshToken: string | null;
+  isLoggingOut: boolean;
 }
 
 class OIDCAuthService {
@@ -35,6 +36,7 @@ class OIDCAuthService {
   private refreshToken: string | null = null;
   private idToken: string | null = null;
   private user: UserInfo | null = null;
+  private isLoggingOut: boolean = false;
   private listeners: ((state: AuthState) => void)[] = [];
 
   constructor() {
@@ -91,7 +93,8 @@ class OIDCAuthService {
       isAuthenticated: this.isAuthenticated(),
       user: this.user,
       token: this.token,
-      refreshToken: this.refreshToken
+      refreshToken: this.refreshToken,
+      isLoggingOut: this.isLoggingOut
     };
     
     this.listeners.forEach(listener => listener(state));
@@ -252,6 +255,10 @@ class OIDCAuthService {
   }
 
   async logout(): Promise<void> {
+    // Set logging out state to show spinner
+    this.isLoggingOut = true;
+    this.notifyListeners();
+    
     // First, construct the logout URL while we still have the tokens
     const logoutUrl = new URL(`${OIDC_CONFIG.issuer}/v1/logout`);
     logoutUrl.searchParams.set('post_logout_redirect_uri', window.location.origin);
@@ -273,17 +280,6 @@ class OIDCAuthService {
       logoutUrl.searchParams.set('id_token_hint', this.token);
       console.warn('⚠️ Using access token as id_token_hint (fallback)');
     }
-
-    // Now clear the tokens and user info
-    this.token = null;
-    this.refreshToken = null;
-    this.idToken = null;
-    this.user = null;
-    
-    this.setStoredToken(null, null, null);
-    this.setStoredUser(null);
-
-    this.notifyListeners();
     
     // Use console.warn for better visibility and persistence
     console.warn('🚪 LOGOUT URL DETAILS (will redirect in 3 seconds):');
@@ -296,6 +292,18 @@ class OIDCAuthService {
     // Add a delay so you can see the logs before redirect
     console.warn('⏳ Redirecting to logout in 3 seconds...');
     setTimeout(() => {
+      // Clear tokens just before redirect (they'll be cleared anyway when redirected back)
+      this.token = null;
+      this.refreshToken = null;
+      this.idToken = null;
+      this.user = null;
+      
+      this.setStoredToken(null, null, null);
+      this.setStoredUser(null);
+      
+      // Reset logging out state
+      this.isLoggingOut = false;
+      
       window.location.href = logoutUrl.toString();
     }, 3000);
   }

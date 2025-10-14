@@ -16,7 +16,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: false,
     user: null,
     token: null,
-    refreshToken: null
+    refreshToken: null,
+    isLoggingOut: false
   })
   const [isLoading, setIsLoading] = useState(true)
 
@@ -26,7 +27,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAuthenticated: oidcAuth.isAuthenticated(),
       user: oidcAuth.getUser(),
       token: oidcAuth.getToken(),
-      refreshToken: null
+      refreshToken: null,
+      isLoggingOut: false
     })
     setIsLoading(false)
 
