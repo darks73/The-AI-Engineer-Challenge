@@ -28,6 +28,17 @@ export default function AuthCallback() {
           throw new Error('No authorization code received')
         }
 
+        // Check if we've already processed this callback (prevent replay)
+        const processedKey = `callback_processed_${code}`
+        if (sessionStorage.getItem(processedKey)) {
+          console.log('Callback already processed, redirecting...')
+          router.push('/')
+          return
+        }
+
+        // Mark this callback as processed
+        sessionStorage.setItem(processedKey, 'true')
+
         console.log('Starting OIDC callback handling...')
         await oidcAuth.handleCallback(code, state || '')
         console.log('OIDC callback completed successfully')
@@ -96,7 +107,14 @@ export default function AuthCallback() {
                 {error}
               </p>
               <button
-                onClick={() => router.push('/')}
+                onClick={() => {
+                  // Clear all session data and start fresh login
+                  sessionStorage.clear();
+                  localStorage.removeItem('oidc_token');
+                  localStorage.removeItem('oidc_refresh_token');
+                  localStorage.removeItem('oidc_user');
+                  router.push('/');
+                }}
                 className="chat-button"
               >
                 Try again
