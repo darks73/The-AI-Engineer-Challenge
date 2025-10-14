@@ -18,6 +18,8 @@ export default function AuthCallback() {
         const state = searchParams.get('state')
         const error = searchParams.get('error')
 
+        console.log('Callback received:', { code: code ? 'present' : 'missing', state, error })
+
         if (error) {
           throw new Error(`Authentication error: ${error}`)
         }
@@ -26,7 +28,9 @@ export default function AuthCallback() {
           throw new Error('No authorization code received')
         }
 
+        console.log('Starting OIDC callback handling...')
         await oidcAuth.handleCallback(code, state || '')
+        console.log('OIDC callback completed successfully')
         setStatus('success')
 
         // Redirect to main app after successful authentication
