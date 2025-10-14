@@ -252,17 +252,7 @@ class OIDCAuthService {
   }
 
   async logout(): Promise<void> {
-    this.token = null;
-    this.refreshToken = null;
-    this.idToken = null;
-    this.user = null;
-    
-    this.setStoredToken(null, null, null);
-    this.setStoredUser(null);
-
-    this.notifyListeners();
-
-    // Redirect to OIDC logout
+    // First, construct the logout URL while we still have the tokens
     const logoutUrl = new URL(`${OIDC_CONFIG.issuer}/v1/logout`);
     logoutUrl.searchParams.set('post_logout_redirect_uri', window.location.origin);
     
@@ -270,6 +260,10 @@ class OIDCAuthService {
     console.warn('🔍 LOGOUT TOKEN CHECK:');
     console.warn('  - ID token available:', !!this.idToken);
     console.warn('  - Access token available:', !!this.token);
+    console.warn('  - ID token from localStorage:', !!localStorage.getItem('oidc_id_token'));
+    console.warn('  - Access token from localStorage:', !!localStorage.getItem('oidc_token'));
+    console.warn('  - Current this.idToken value:', this.idToken);
+    console.warn('  - Current this.token value:', this.token ? 'Present' : 'Missing');
     
     if (this.idToken) {
       logoutUrl.searchParams.set('id_token_hint', this.idToken);
@@ -279,6 +273,17 @@ class OIDCAuthService {
       logoutUrl.searchParams.set('id_token_hint', this.token);
       console.warn('⚠️ Using access token as id_token_hint (fallback)');
     }
+
+    // Now clear the tokens and user info
+    this.token = null;
+    this.refreshToken = null;
+    this.idToken = null;
+    this.user = null;
+    
+    this.setStoredToken(null, null, null);
+    this.setStoredUser(null);
+
+    this.notifyListeners();
     
     // Use console.warn for better visibility and persistence
     console.warn('🚪 LOGOUT URL DETAILS (will redirect in 3 seconds):');
