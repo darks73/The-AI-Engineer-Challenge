@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { oidcAuth } from '../../lib/oidc'
+import { oidcAuth } from '../../../lib/oidc'
 import { LogIn, AlertCircle } from 'lucide-react'
 
 export default function AuthCallback() {
