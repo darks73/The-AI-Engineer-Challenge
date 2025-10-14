@@ -1,7 +1,8 @@
 # Import required FastAPI components for building the API
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Depends, Header
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 # Import Pydantic for data validation and settings management
 from pydantic import BaseModel
 # Import OpenAI client for interacting with OpenAI's API
@@ -11,6 +12,7 @@ import base64
 import io
 import asyncio
 from typing import Optional, List
+from auth import oidc_auth
 
 # Initialize FastAPI application with a title
 app = FastAPI(title="OpenAI Chat API")
@@ -25,6 +27,23 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers in requests
 )
 
+# OIDC Authentication
+security = HTTPBearer()
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Dependency to validate JWT token and return user claims"""
+    token = credentials.credentials
+    claims = await oidc_auth.validate_token(token)
+    
+    if not claims:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    return claims
+
 # Define the data model for chat requests using Pydantic
 # This ensures incoming request data is properly validated
 class ChatRequest(BaseModel):
@@ -36,7 +55,7 @@ class ChatRequest(BaseModel):
 
 # Define the main chat endpoint that handles POST requests
 @app.post("/api/chat")
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, current_user: dict = Depends(get_current_user)):
     try:
         # Initialize OpenAI client with the provided API key
         client = OpenAI(api_key=request.api_key)
@@ -100,6 +119,17 @@ async def health_check():
 @app.get("/health")
 async def health():
     return {"status": "ok", "service": "fastapi"}
+
+# Get current user info
+@app.get("/api/user")
+async def get_user_info(current_user: dict = Depends(get_current_user)):
+    """Get current user information from JWT token"""
+    return {
+        "sub": current_user.get("sub"),
+        "name": current_user.get("name"),
+        "email": current_user.get("email"),
+        "preferred_username": current_user.get("preferred_username")
+    }
 
 
 # Entry point for running the application directly

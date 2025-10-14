@@ -4,7 +4,8 @@ import { useState } from 'react'
 import ChatInput from './ChatInput'
 import ChatMessages from './ChatMessages'
 import SettingsModal from './SettingsModal'
-import { Plus, Settings } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
+import { Plus, Settings, LogOut } from 'lucide-react'
 
 interface Message {
   id: string
@@ -23,6 +24,7 @@ interface ChatSettings {
 }
 
 export default function ChatInterface() {
+  const { user, token, logout } = useAuth()
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
@@ -92,11 +94,12 @@ export default function ChatInterface() {
       }
 
           const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api/chat'
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
         body: JSON.stringify({
           developer_message: settings.developerMessage,
           user_message: content.trim(),
@@ -239,7 +242,14 @@ export default function ChatInterface() {
     <div className="flex flex-col h-screen max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-dark-border">
-        <h1 className="text-xl font-semibold text-dark-text">AI Chat</h1>
+        <div className="flex items-center space-x-4">
+          <h1 className="text-xl font-semibold text-dark-text">AI Chat</h1>
+          {user && (
+            <div className="text-sm text-dark-text-secondary">
+              Welcome, {user.name || user.preferred_username || user.email}!
+            </div>
+          )}
+        </div>
         <div className="flex gap-2">
           <button
             onClick={handleNewChat}
@@ -254,6 +264,13 @@ export default function ChatInterface() {
           >
             <Settings size={16} />
             Settings
+          </button>
+          <button
+            onClick={logout}
+            className="chat-button-secondary flex items-center gap-2 text-red-400 hover:text-red-300"
+          >
+            <LogOut size={16} />
+            Logout
           </button>
         </div>
       </div>
