@@ -268,10 +268,10 @@ export default function ChatInterface() {
         <div className="flex gap-2">
           <button
             onClick={handleNewChat}
-            className="chat-button-secondary flex items-center gap-2"
+            className="icon-button"
+            title="New Chat"
           >
-            <Plus size={16} />
-            New Chat
+            <Plus size={20} />
           </button>
           <button
             onClick={() => setShowSettings(true)}
