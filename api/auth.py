@@ -79,17 +79,23 @@ class OIDCAuthService:
 
     async def validate_token(self, token: str) -> Optional[Dict[str, Any]]:
         """Validate JWT token and return claims if valid"""
+        print(f"\n🔑 DEBUG: validate_token called with token: {token[:50] if token else 'None'}...")
         try:
             # Get signing key
+            print(f"🔑 DEBUG: Getting signing key...")
             signing_key = await self.get_signing_key(token)
             if not signing_key:
+                print(f"🔑 DEBUG: No signing key found for token")
                 return None
 
             # Get OIDC config for issuer validation
+            print(f"🔑 DEBUG: Getting OIDC config...")
             config = await self.get_oidc_config()
             expected_issuer = config["issuer"]
+            print(f"🔑 DEBUG: Expected issuer: {expected_issuer}")
 
             # Decode and verify token
+            print(f"🔑 DEBUG: Decoding and verifying JWT token...")
             claims = jwt.decode(
                 token,
                 signing_key,
@@ -104,13 +110,14 @@ class OIDCAuthService:
                 }
             )
 
+            print(f"🔑 DEBUG: Token validation successful! Claims: {claims}")
             return claims
 
         except JWTError as e:
-            print(f"JWT validation error: {e}")
+            print(f"🔑 DEBUG: JWT validation error: {e}")
             return None
         except Exception as e:
-            print(f"Token validation error: {e}")
+            print(f"🔑 DEBUG: Token validation error: {e}")
             return None
 
     async def get_user_info(self, token: str) -> Optional[Dict[str, Any]]:

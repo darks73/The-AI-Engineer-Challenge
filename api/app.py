@@ -40,17 +40,42 @@ security = HTTPBearer()
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     """Dependency to validate JWT token and return user claims"""
-    token = credentials.credentials
-    claims = await oidc_auth.validate_token(token)
+    print(f"\n🔐 DEBUG: Authentication called")
+    print(f"🔐 DEBUG: Credentials: {credentials}")
     
-    if not claims:
+    if not credentials:
+        print(f"🔐 DEBUG: No credentials provided")
         raise HTTPException(
             status_code=401,
-            detail="Invalid or expired token",
+            detail="No credentials provided",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    return claims
+    token = credentials.credentials
+    print(f"🔐 DEBUG: Token (first 50 chars): {token[:50] if token else 'None'}...")
+    
+    try:
+        claims = await oidc_auth.validate_token(token)
+        print(f"🔐 DEBUG: Token validation result: {claims}")
+        
+        if not claims:
+            print(f"🔐 DEBUG: Token validation failed - no claims returned")
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid or expired token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        print(f"🔐 DEBUG: Authentication successful for user: {claims.get('sub', 'Unknown')}")
+        return claims
+        
+    except Exception as e:
+        print(f"🔐 DEBUG: Token validation error: {e}")
+        raise HTTPException(
+            status_code=401,
+            detail=f"Token validation error: {str(e)}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 # Define the data model for chat requests using Pydantic
 # This ensures incoming request data is properly validated
@@ -64,6 +89,9 @@ class ChatRequest(BaseModel):
 # Define the main chat endpoint that handles POST requests
 @app.post("/api/chat")
 async def chat(request: ChatRequest, current_user: dict = Depends(get_current_user)):
+    print(f"\n🔍 DEBUG: Chat endpoint called")
+    print(f"🔍 DEBUG: Request data: {request}")
+    print(f"🔍 DEBUG: Current user: {current_user}")
     try:
         # Use provided API key or fall back to environment variable
         api_key = request.api_key or os.environ.get("OPENAI_API_KEY")
