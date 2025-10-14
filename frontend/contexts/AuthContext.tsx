@@ -25,7 +25,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthState({
       isAuthenticated: oidcAuth.isAuthenticated(),
       user: oidcAuth.getUser(),
-      token: oidcAuth.getToken()
+      token: oidcAuth.getToken(),
+      refreshToken: null
     })
     setIsLoading(false)
 
