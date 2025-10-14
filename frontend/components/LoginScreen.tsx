@@ -45,7 +45,7 @@ export default function LoginScreen() {
         {/* Info */}
         <div className="text-sm text-dark-text-secondary">
           <p>
-            You'll be redirected to OneWelcome to sign in securely.
+            You&apos;ll be redirected to OneWelcome to sign in securely.
           </p>
         </div>
       </div>
