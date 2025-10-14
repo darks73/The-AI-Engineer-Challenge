@@ -129,7 +129,9 @@ async def get_user_info(current_user: dict = Depends(get_current_user)):
         "name": current_user.get("name"),
         "email": current_user.get("email"),
         "preferred_username": current_user.get("preferred_username"),
-        "login_user_name": current_user.get("login_user_name")
+        "login_user_name": current_user.get("login_user_name"),
+        "given_name": current_user.get("given_name"),
+        "family_name": current_user.get("family_name")
     }
 
 

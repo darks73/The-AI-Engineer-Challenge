@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ChatInput from './ChatInput'
 import ChatMessages from './ChatMessages'
 import SettingsModal from './SettingsModal'
@@ -38,6 +38,34 @@ function decodeHtmlEntities(text: string): string {
     .replace(/&apos;/g, "'")
 }
 
+// Helper function to compute initials from user info
+function computeUserInitials(user: any): string {
+  if (!user) return 'U'
+  
+  const givenName = user.given_name || ''
+  const familyName = user.family_name || ''
+  
+  if (givenName && familyName) {
+    return (givenName.charAt(0) + familyName.charAt(0)).toUpperCase()
+  }
+  
+  if (givenName) {
+    return givenName.charAt(0).toUpperCase()
+  }
+  
+  if (familyName) {
+    return familyName.charAt(0).toUpperCase()
+  }
+  
+  // Fallback to first character of name if available
+  const name = user.name || user.preferred_username || user.email || ''
+  if (name) {
+    return name.charAt(0).toUpperCase()
+  }
+  
+  return 'U'
+}
+
 export default function ChatInterface() {
   const { user, token, logout } = useAuth()
   const [messages, setMessages] = useState<Message[]>([])
@@ -50,6 +78,18 @@ export default function ChatInterface() {
     model: 'gpt-4o-mini',
     userInitials: 'U'
   })
+  const [hasCustomInitials, setHasCustomInitials] = useState(false)
+
+  // Update initials when user becomes available, but only if not manually set
+  useEffect(() => {
+    if (user && !hasCustomInitials) {
+      const computedInitials = computeUserInitials(user)
+      setSettings(prev => ({
+        ...prev,
+        userInitials: computedInitials
+      }))
+    }
+  }, [user, hasCustomInitials])
 
   const handleSendMessage = async (content: string) => {
     if (!content.trim()) return
@@ -189,6 +229,10 @@ export default function ChatInterface() {
   }
 
   const handleSettingsChange = (newSettings: ChatSettings) => {
+    // Check if user initials were manually changed
+    if (newSettings.userInitials !== settings.userInitials) {
+      setHasCustomInitials(true)
+    }
     setSettings(newSettings)
     setShowSettings(false)
   }
