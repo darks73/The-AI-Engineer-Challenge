@@ -23,6 +23,21 @@ interface ChatSettings {
   userInitials: string
 }
 
+// Helper function to decode HTML entities
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&#40;/g, '(')
+    .replace(/&#41;/g, ')')
+    .replace(/&#60;/g, '<')
+    .replace(/&#62;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+}
+
 export default function ChatInterface() {
   const { user, token, logout } = useAuth()
   const [messages, setMessages] = useState<Message[]>([])
@@ -246,7 +261,7 @@ export default function ChatInterface() {
           <h1 className="text-xl font-semibold text-dark-text">AI Chat</h1>
           {user && (
             <div className="text-sm text-dark-text-secondary">
-              Welcome, {user.name || user.preferred_username || user.email}!
+              Welcome, {decodeHtmlEntities(user.name || user.preferred_username || user.email)}!
             </div>
           )}
         </div>
