@@ -15,7 +15,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
     user: null,
-    token: null
+    token: null,
+    refreshToken: null
   })
   const [isLoading, setIsLoading] = useState(true)
 
