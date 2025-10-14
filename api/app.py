@@ -14,6 +14,14 @@ import asyncio
 from typing import Optional, List
 from auth import oidc_auth
 
+# Load environment variables from .env file (optional)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # python-dotenv not installed, continue without it
+    pass
+
 # Initialize FastAPI application with a title
 app = FastAPI(title="OpenAI Chat API")
 
