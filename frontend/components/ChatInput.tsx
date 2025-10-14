@@ -89,11 +89,11 @@ export default function ChatInput({ onSendMessage, disabled = false, attachments
             />
             <button
               type="button"
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-dark-bg hover:bg-dark-border text-dark-text-secondary hover:text-dark-text transition-colors duration-200 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 rounded-lg text-dark-text-secondary hover:text-dark-text hover:bg-dark-border transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={disabled}
+              title="Add attachment"
             >
-              <Paperclip size={16} />
-              Add
+              <Paperclip size={20} />
             </button>
           </div>
 
@@ -121,19 +121,20 @@ export default function ChatInput({ onSendMessage, disabled = false, attachments
             type="button"
             onClick={handleVoiceClick}
             disabled={disabled}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-dark-bg hover:bg-dark-border text-dark-text-secondary hover:text-dark-text transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 rounded-lg text-dark-text-secondary hover:text-dark-text hover:bg-dark-border transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Voice input"
           >
-            <Mic size={16} />
-            <span className="text-sm font-medium">Voice</span>
+            <Mic size={20} />
           </button>
 
           {/* Send button */}
           <button
             type="submit"
             disabled={!message.trim() || disabled}
-            className="chat-button flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="chat-button disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Send message"
           >
-            <Send size={16} />
+            <Send size={20} />
           </button>
         </div>
       </form>

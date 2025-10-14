@@ -261,7 +261,7 @@ export default function ChatInterface() {
           <h1 className="text-xl font-semibold text-dark-text">AI Chat</h1>
           {user && (
             <div className="text-sm text-dark-text-secondary">
-              Welcome, {decodeHtmlEntities(user.login_user_name || user.name || user.preferred_username || user.email)}!
+              Welcome, {decodeHtmlEntities(user.login_user_name || user.name || user.preferred_username || user.email || 'User')}!
             </div>
           )}
         </div>
@@ -275,17 +275,17 @@ export default function ChatInterface() {
           </button>
           <button
             onClick={() => setShowSettings(true)}
-            className="chat-button-secondary flex items-center gap-2"
+            className="icon-button"
+            title="Settings"
           >
-            <Settings size={16} />
-            Settings
+            <Settings size={20} />
           </button>
           <button
             onClick={logout}
-            className="chat-button-secondary flex items-center gap-2 text-red-400 hover:text-red-300"
+            className="icon-button-red"
+            title="Logout"
           >
-            <LogOut size={16} />
-            Logout
+            <LogOut size={20} />
           </button>
         </div>
       </div>

@@ -22,6 +22,14 @@
     @apply bg-dark-surface hover:bg-dark-border border border-dark-border text-dark-text px-4 py-2 rounded-lg transition-colors duration-200 font-medium;
   }
   
+  .icon-button {
+    @apply p-2 rounded-lg text-dark-text-secondary hover:text-dark-text hover:bg-dark-border transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .icon-button-red {
+    @apply p-2 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
   /* Custom scrollbar styling for chat messages */
   .chat-scroll {
     scrollbar-width: thin;
