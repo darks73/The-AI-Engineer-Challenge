@@ -261,7 +261,7 @@ export default function ChatInterface() {
           <h1 className="text-xl font-semibold text-dark-text">AI Chat</h1>
           {user && (
             <div className="text-sm text-dark-text-secondary">
-              Welcome, {decodeHtmlEntities(user.name || user.preferred_username || user.email)}!
+              Welcome, {decodeHtmlEntities(user.login_user_name || user.name || user.preferred_username || user.email)}!
             </div>
           )}
         </div>
