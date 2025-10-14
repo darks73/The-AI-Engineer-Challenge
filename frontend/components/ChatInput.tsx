@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Mic, Send, Paperclip, X, Image } from 'lucide-react'
+import { Mic, Send, Paperclip, X, Image, MicOff } from 'lucide-react'
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void
@@ -13,7 +13,10 @@ interface ChatInputProps {
 
 export default function ChatInput({ onSendMessage, disabled = false, attachments, onFileUpload, onRemoveAttachment }: ChatInputProps) {
   const [message, setMessage] = useState('')
+  const [isListening, setIsListening] = useState(false)
+  const [isVoiceSupported, setIsVoiceSupported] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const recognitionRef = useRef<any>(null)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,9 +33,81 @@ export default function ChatInput({ onSendMessage, disabled = false, attachments
     }
   }
 
+  // Check if voice recognition is supported
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    setIsVoiceSupported(!!SpeechRecognition)
+  }, [])
+
+  const startListening = () => {
+    if (!isVoiceSupported) {
+      alert('Voice recognition is not supported in this browser')
+      return
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    const recognition = new SpeechRecognition()
+    
+    recognition.continuous = false
+    recognition.interimResults = true
+    recognition.lang = 'en-US'
+
+    recognition.onstart = () => {
+      setIsListening(true)
+    }
+
+    recognition.onresult = (event: any) => {
+      const transcript = Array.from(event.results)
+        .map((result: any) => result[0])
+        .map((result: any) => result.transcript)
+        .join('')
+      
+      setMessage(transcript)
+    }
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error)
+      setIsListening(false)
+      
+      switch (event.error) {
+        case 'no-speech':
+          alert('No speech was detected. Please try again.')
+          break
+        case 'audio-capture':
+          alert('No microphone was found. Please ensure a microphone is connected.')
+          break
+        case 'not-allowed':
+          alert('Permission to use microphone was denied. Please allow microphone access.')
+          break
+        case 'network':
+          alert('Network error occurred. Please check your connection.')
+          break
+        default:
+          alert('Speech recognition failed. Please try again.')
+      }
+    }
+
+    recognition.onend = () => {
+      setIsListening(false)
+    }
+
+    recognitionRef.current = recognition
+    recognition.start()
+  }
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop()
+      setIsListening(false)
+    }
+  }
+
   const handleVoiceClick = () => {
-    // Placeholder for voice input functionality
-    alert('Voice input not implemented yet')
+    if (isListening) {
+      stopListening()
+    } else {
+      startListening()
+    }
   }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,6 +126,15 @@ export default function ChatInput({ onSendMessage, disabled = false, attachments
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
     }
   }, [message])
+
+  // Cleanup voice recognition on unmount
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop()
+      }
+    }
+  }, [])
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -121,11 +205,15 @@ export default function ChatInput({ onSendMessage, disabled = false, attachments
           <button
             type="button"
             onClick={handleVoiceClick}
-            disabled={disabled}
-            className="p-2 rounded-lg text-dark-text-secondary hover:text-dark-text hover:bg-dark-border transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Voice input"
+            disabled={disabled || !isVoiceSupported}
+            className={`p-2 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+              isListening 
+                ? 'text-red-500 bg-red-500/10 animate-pulse' 
+                : 'text-dark-text-secondary hover:text-dark-text hover:bg-dark-border'
+            }`}
+            title={isVoiceSupported ? (isListening ? 'Stop listening' : 'Voice input') : 'Voice input not supported'}
           >
-            <Mic size={20} />
+            {isListening ? <MicOff size={20} /> : <Mic size={20} />}
           </button>
 
           {/* Send button */}
