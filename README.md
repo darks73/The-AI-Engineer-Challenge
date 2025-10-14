@@ -95,6 +95,23 @@ Got everything in place? Let's move on!
 </details>
 
 <details>
+  <summary>☁️ Backend Deployment with Railway</summary>
+
+For production deployment, we recommend using Railway for the backend:
+
+1. **Go to [railway.app](https://railway.app)** and sign up with GitHub
+2. **Create New Project** → "Deploy from GitHub repo"
+3. **Select your repository** and set **Root Directory** to `api/`
+4. **Add Environment Variable:**
+   - `OPENAI_API_KEY` = your OpenAI API key
+5. **Railway auto-detects** Python, FastAPI, and Gunicorn configuration
+6. **Test your deployment** at the provided Railway URL
+
+**Detailed Railway deployment instructions:** See `api/README.md` for comprehensive setup guide.
+
+</details>
+
+<details>
   <summary>🔥Setting Up for Vibe Coding Success </summary>
 
 While it is a bit counter-intuitive to set things up before jumping into vibe-coding - it's important to remember that there exists a gradient betweeen AI-Assisted Development and Vibe-Coding. We're only reaching *slightly* into AI-Assisted Development for this challenge, but it's worth it!
