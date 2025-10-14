@@ -189,15 +189,24 @@ class OIDCAuthService {
       sessionStorage.removeItem('oidc_state');
 
       const tokenData = await tokenResponse.json();
+      
+      // Debug: Log all tokens received
+      console.warn('🔍 TOKEN RESPONSE DEBUG:');
+      console.warn('  - Available keys:', Object.keys(tokenData));
+      console.warn('  - Has access_token:', !!tokenData.access_token);
+      console.warn('  - Has refresh_token:', !!tokenData.refresh_token);
+      console.warn('  - Has id_token:', !!tokenData.id_token);
+      console.warn('  - Full token data:', tokenData);
+      
       this.token = tokenData.access_token;
       this.refreshToken = tokenData.refresh_token;
       
       // Store ID token if present (needed for logout)
       if (tokenData.id_token) {
         this.idToken = tokenData.id_token;
-        console.log('ID token received and stored');
+        console.warn('✅ ID token received and stored');
       } else {
-        console.log('No ID token in response');
+        console.warn('❌ No ID token in response - using access token as fallback for logout');
       }
 
       // Get user info
