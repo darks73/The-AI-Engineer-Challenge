@@ -5,6 +5,7 @@ import ChatInput from './ChatInput'
 import ChatMessages from './ChatMessages'
 import SettingsModal from './SettingsModal'
 import { useAuth } from '../contexts/AuthContext'
+import { oidcAuth } from '../lib/oidc'
 import { Plus, Settings, LogOut } from 'lucide-react'
 
 interface Message {
@@ -93,6 +94,20 @@ export default function ChatInterface() {
 
   const handleSendMessage = async (content: string) => {
     if (!content.trim()) return
+    
+    // Check authentication status before sending
+    console.log('🔐 Auth status check:', {
+      isAuthenticated: oidcAuth.isAuthenticated(),
+      hasToken: !!oidcAuth.getToken(),
+      hasRefreshToken: !!oidcAuth.getRefreshToken(),
+      user: oidcAuth.getUser()
+    })
+    
+    if (!oidcAuth.isAuthenticated() || !token) {
+      console.log('🔐 Not authenticated - redirecting to login...')
+      await logout()
+      return
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -130,7 +145,6 @@ export default function ChatInterface() {
       }
 
           const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api/chat'
-          console.log('🔍 DEBUG: Frontend API URL:', apiUrl)
           const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
@@ -147,6 +161,70 @@ export default function ChatInterface() {
       })
 
       if (!response.ok) {
+        // Handle 401 Unauthorized - try to refresh token or redirect to login
+        if (response.status === 401) {
+          console.log('🔐 401 Unauthorized - attempting token refresh...')
+          const refreshSuccess = await oidcAuth.refreshAccessToken()
+          
+          if (refreshSuccess) {
+            console.log('🔐 Token refreshed successfully - retrying request...')
+            // Retry the request with the new token
+            const newToken = oidcAuth.getToken()
+            if (newToken) {
+              const retryResponse = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${newToken}`,
+                },
+                body: JSON.stringify({
+                  developer_message: settings.developerMessage,
+                  user_message: content.trim(),
+                  model: settings.model,
+                  api_key: settings.apiKey.trim() || null,
+                  images: imageBase64s.length > 0 ? imageBase64s : undefined
+                })
+              })
+              
+              if (retryResponse.ok) {
+                // Continue with the successful retry response
+                const reader = retryResponse.body?.getReader()
+                if (!reader) {
+                  throw new Error('No response body')
+                }
+                
+                const assistantMessage: Message = {
+                  id: (Date.now() + 1).toString(),
+                  role: 'assistant',
+                  content: '',
+                  timestamp: new Date()
+                }
+                
+                setMessages(prev => [...prev, assistantMessage])
+                
+                while (true) {
+                  const { done, value } = await reader.read()
+                  if (done) break
+                  
+                  const chunk = new TextDecoder().decode(value)
+                  setMessages(prev => prev.map(msg => 
+                    msg.id === assistantMessage.id 
+                      ? { ...msg, content: msg.content + chunk }
+                      : msg
+                  ))
+                }
+                
+                return // Success - exit early
+              }
+            }
+          }
+          
+          // If refresh failed or retry failed, redirect to login
+          console.log('🔐 Token refresh failed - redirecting to login...')
+          await logout()
+          return
+        }
+        
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
