@@ -43,6 +43,9 @@ function AuthCallbackContent() {
         await oidcAuth.handleCallback(code, state || '')
         console.log('OIDC callback completed successfully')
         
+        // Set a flag to indicate we're transitioning from callback
+        sessionStorage.setItem('oidc_callback_completed', 'true')
+        
         // Redirect immediately to main app
         router.push('/')
 

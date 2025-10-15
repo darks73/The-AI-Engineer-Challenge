@@ -1,11 +1,26 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { AuthProvider, useAuth } from '../contexts/AuthContext'
 import ChatInterface from '@/components/ChatInterface'
 import LoginScreen from '@/components/LoginScreen'
 
 function AppContent() {
   const { isAuthenticated, isLoading, isLoggingOut, isLoggingIn } = useAuth()
+  
+  // Check if we're transitioning from a callback
+  const [isTransitioningFromCallback, setIsTransitioningFromCallback] = useState(false)
+  
+  useEffect(() => {
+    // Check if we're coming from a callback
+    if (typeof window !== 'undefined' && sessionStorage.getItem('oidc_callback_completed')) {
+      setIsTransitioningFromCallback(true)
+      // Clear the flag
+      sessionStorage.removeItem('oidc_callback_completed')
+      // Clear after a short delay to allow auth state to update
+      setTimeout(() => setIsTransitioningFromCallback(false), 500)
+    }
+  }, [])
 
   if (isLoading) {
     return (
@@ -25,7 +40,7 @@ function AppContent() {
     )
   }
 
-  if (isLoggingIn) {
+  if (isLoggingIn || isTransitioningFromCallback) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-dark-bg">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mb-4"></div>
