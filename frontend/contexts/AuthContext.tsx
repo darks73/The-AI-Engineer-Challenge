@@ -24,20 +24,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Initialize auth state
-    setAuthState({
+    const initialAuthState = {
       isAuthenticated: oidcAuth.isAuthenticated(),
       user: oidcAuth.getUser(),
       token: oidcAuth.getToken(),
       refreshToken: null,
       isLoggingOut: false,
       isLoggingIn: false
-    })
-    setIsLoading(false)
+    }
+    setAuthState(initialAuthState)
 
     // Subscribe to auth state changes
     const unsubscribe = oidcAuth.subscribe((newState) => {
       setAuthState(newState)
+      // Only stop loading after we get the first auth state update
+      if (newState.isAuthenticated || (!newState.isAuthenticated && !newState.isLoggingIn)) {
+        setIsLoading(false)
+      }
     })
+
+    // If we're already authenticated, stop loading immediately
+    if (initialAuthState.isAuthenticated) {
+      setIsLoading(false)
+    }
 
     return unsubscribe
   }, [])

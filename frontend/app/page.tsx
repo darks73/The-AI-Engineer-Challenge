@@ -14,13 +14,32 @@ function AppContent() {
   useEffect(() => {
     // Check if we're coming from a callback
     if (typeof window !== 'undefined' && sessionStorage.getItem('oidc_callback_completed')) {
+      console.log('🔍 Detected callback completion, showing login loading...')
       setIsTransitioningFromCallback(true)
       // Clear the flag
       sessionStorage.removeItem('oidc_callback_completed')
-      // Clear after a short delay to allow auth state to update
-      setTimeout(() => setIsTransitioningFromCallback(false), 500)
+      
+      // Clear the transition state when we're actually authenticated
+      const checkAuthState = () => {
+        if (isAuthenticated) {
+          console.log('🔍 Authentication confirmed, hiding login loading...')
+          setIsTransitioningFromCallback(false)
+        } else {
+          // Keep checking until authenticated or timeout
+          setTimeout(checkAuthState, 100)
+        }
+      }
+      
+      // Start checking auth state
+      checkAuthState()
+      
+      // Fallback timeout after 3 seconds
+      setTimeout(() => {
+        console.log('🔍 Fallback timeout, hiding login loading...')
+        setIsTransitioningFromCallback(false)
+      }, 3000)
     }
-  }, [])
+  }, [isAuthenticated])
 
   if (isLoading) {
     return (
