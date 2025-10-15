@@ -89,6 +89,15 @@ function AuthCallbackContent() {
     handleCallback()
   }, [searchParams, router])
 
+  // For success case, render the chat interface directly without wrapper constraints
+  if (status === 'success') {
+    return (
+      <AuthProvider>
+        <AuthenticatedChatInterface />
+      </AuthProvider>
+    )
+  }
+
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-dark-bg">
       <div className="text-center space-y-6 max-w-md mx-auto p-8">
@@ -106,12 +115,6 @@ function AuthCallbackContent() {
               </p>
             </div>
           </>
-        )}
-
-        {status === 'success' && (
-          <AuthProvider>
-            <AuthenticatedChatInterface />
-          </AuthProvider>
         )}
 
         {status === 'error' && (
