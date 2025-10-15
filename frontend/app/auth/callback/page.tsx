@@ -5,7 +5,34 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { oidcAuth } from '../../../lib/oidc'
 import { LogIn, AlertCircle } from 'lucide-react'
 import ChatInterface from '../../../components/ChatInterface'
-import { AuthProvider } from '../../../contexts/AuthContext'
+import { AuthProvider, useAuth } from '../../../contexts/AuthContext'
+
+function AuthenticatedChatInterface() {
+  const { isAuthenticated, isLoading } = useAuth()
+  
+  // Show loading until authentication is confirmed
+  if (isLoading || !isAuthenticated) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-dark-bg">
+        <div className="text-center space-y-6 max-w-md mx-auto p-8">
+          <div className="w-16 h-16 mx-auto bg-blue-500 rounded-full flex items-center justify-center animate-spin">
+            <LogIn size={24} className="text-white" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold text-dark-text">
+              Completing sign in...
+            </h2>
+            <p className="text-dark-text-secondary">
+              Please wait while we complete your authentication.
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+  
+  return <ChatInterface />
+}
 
 function AuthCallbackContent() {
   const router = useRouter()
@@ -33,8 +60,8 @@ function AuthCallbackContent() {
         // Check if we've already processed this callback (prevent replay)
         const processedKey = `callback_processed_${code}`
         if (sessionStorage.getItem(processedKey)) {
-          console.log('Callback already processed, redirecting...')
-          router.push('/')
+          console.log('Callback already processed, staying on callback page...')
+          setStatus('success')
           return
         }
 
@@ -45,19 +72,11 @@ function AuthCallbackContent() {
         await oidcAuth.handleCallback(code, state || '')
         console.log('OIDC callback completed successfully')
         
-        // Wait for authentication state to be confirmed
-        let attempts = 0
-        const maxAttempts = 50 // 5 seconds max
-        while (attempts < maxAttempts) {
-          if (oidcAuth.isAuthenticated()) {
-            console.log('🔍 Authentication confirmed, redirecting...')
-            break
-          }
-          await new Promise(resolve => setTimeout(resolve, 100))
-          attempts++
-        }
+        // Brief delay to ensure authentication state is settled
+        console.log('🔍 Ensuring authentication state is settled...')
+        await new Promise(resolve => setTimeout(resolve, 500))
         
-        // Instead of redirecting, directly render the chat interface
+        // Directly render the chat interface on the callback page
         setStatus('success')
 
       } catch (err) {
@@ -91,7 +110,7 @@ function AuthCallbackContent() {
 
         {status === 'success' && (
           <AuthProvider>
-            <ChatInterface />
+            <AuthenticatedChatInterface />
           </AuthProvider>
         )}
 
