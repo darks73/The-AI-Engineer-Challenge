@@ -18,28 +18,13 @@ function AppContent() {
       setIsTransitioningFromCallback(true)
       // Clear the flag
       sessionStorage.removeItem('oidc_callback_completed')
-      
-      // Clear the transition state when we're actually authenticated
-      const checkAuthState = () => {
-        if (isAuthenticated) {
-          console.log('🔍 Authentication confirmed, hiding login loading...')
-          setIsTransitioningFromCallback(false)
-        } else {
-          // Keep checking until authenticated or timeout
-          setTimeout(checkAuthState, 100)
-        }
-      }
-      
-      // Start checking auth state
-      checkAuthState()
-      
-      // Fallback timeout after 3 seconds
+      // Clear after a reasonable delay
       setTimeout(() => {
-        console.log('🔍 Fallback timeout, hiding login loading...')
+        console.log('🔍 Hiding login loading...')
         setIsTransitioningFromCallback(false)
-      }, 3000)
+      }, 1500)
     }
-  }, [isAuthenticated])
+  }, [])
 
   if (isLoading) {
     return (
