@@ -31,7 +31,7 @@ function AppContent() {
 export default function Home() {
   return (
     <AuthProvider>
-      <main className="min-h-screen bg-dark-bg flex flex-col">
+      <main className="h-screen bg-dark-bg overflow-hidden">
         <AppContent />
       </main>
     </AuthProvider>
