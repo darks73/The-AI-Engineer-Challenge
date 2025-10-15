@@ -387,18 +387,7 @@ export default function ChatInterface() {
             </div>
           )}
         </div>
-        <div className="flex items-center gap-4">
-          {/* Model Selector */}
-          <ModelSelector
-            provider={settings.provider}
-            model={settings.model}
-            onProviderChange={handleProviderChange}
-            onModelChange={handleModelChange}
-            disabled={isLoading}
-          />
-          
-          {/* Action Buttons */}
-          <div className="flex gap-2">
+        <div className="flex gap-2">
             <button
               onClick={handleNewChat}
               className="icon-button"
@@ -421,7 +410,6 @@ export default function ChatInterface() {
               <LogOut size={20} />
             </button>
           </div>
-        </div>
       </div>
 
       {/* Chat Messages */}
@@ -442,6 +430,10 @@ export default function ChatInterface() {
           attachments={attachments}
           onFileUpload={handleFileUpload}
           onRemoveAttachment={removeAttachment}
+          provider={settings.provider}
+          model={settings.model}
+          onProviderChange={handleProviderChange}
+          onModelChange={handleModelChange}
         />
       </div>
 

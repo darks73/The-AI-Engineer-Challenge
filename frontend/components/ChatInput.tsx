@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Mic, Send, Paperclip, X, Image, MicOff } from 'lucide-react'
+import ModelSelector from './ModelSelector'
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void
@@ -9,9 +10,14 @@ interface ChatInputProps {
   attachments: File[]
   onFileUpload: (files: File[]) => void
   onRemoveAttachment: (index: number) => void
+  // Model selector props
+  provider: 'openai' | 'claude'
+  model: string
+  onProviderChange: (provider: 'openai' | 'claude') => void
+  onModelChange: (model: string) => void
 }
 
-export default function ChatInput({ onSendMessage, disabled = false, attachments, onFileUpload, onRemoveAttachment }: ChatInputProps) {
+export default function ChatInput({ onSendMessage, disabled = false, attachments, onFileUpload, onRemoveAttachment, provider, model, onProviderChange, onModelChange }: ChatInputProps) {
   const [message, setMessage] = useState('')
   const [isListening, setIsListening] = useState(false)
   const [isVoiceSupported, setIsVoiceSupported] = useState(false)
@@ -138,6 +144,17 @@ export default function ChatInput({ onSendMessage, disabled = false, attachments
 
   return (
     <div className="w-full max-w-4xl mx-auto">
+      {/* Model Selector */}
+      <div className="mb-4 flex justify-center">
+        <ModelSelector
+          provider={provider}
+          model={model}
+          onProviderChange={onProviderChange}
+          onModelChange={onModelChange}
+          disabled={disabled}
+        />
+      </div>
+      
       {/* Attachment previews */}
       {attachments.length > 0 && (
         <div className="mb-4 flex flex-wrap gap-2">
