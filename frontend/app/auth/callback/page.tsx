@@ -43,8 +43,17 @@ function AuthCallbackContent() {
         await oidcAuth.handleCallback(code, state || '')
         console.log('OIDC callback completed successfully')
         
-        // Wait a moment for the authentication state to propagate
-        await new Promise(resolve => setTimeout(resolve, 100))
+        // Wait for authentication state to be confirmed
+        let attempts = 0
+        const maxAttempts = 50 // 5 seconds max
+        while (attempts < maxAttempts) {
+          if (oidcAuth.isAuthenticated()) {
+            console.log('🔍 Authentication confirmed, redirecting...')
+            break
+          }
+          await new Promise(resolve => setTimeout(resolve, 100))
+          attempts++
+        }
         
         // Redirect to main app - authentication should now be confirmed
         router.push('/')
