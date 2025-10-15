@@ -5,7 +5,7 @@ import ChatInterface from '@/components/ChatInterface'
 import LoginScreen from '@/components/LoginScreen'
 
 function AppContent() {
-  const { isAuthenticated, isLoading, isLoggingOut } = useAuth()
+  const { isAuthenticated, isLoading, isLoggingOut, isLoggingIn } = useAuth()
 
   if (isLoading) {
     return (
@@ -21,6 +21,16 @@ function AppContent() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
         <div className="text-dark-text text-lg">Logging you out...</div>
         <div className="text-dark-text-secondary text-sm mt-2">Please wait while we complete the logout process</div>
+      </div>
+    )
+  }
+
+  if (isLoggingIn) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-dark-bg">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mb-4"></div>
+        <div className="text-dark-text text-lg">Logging you in...</div>
+        <div className="text-dark-text-secondary text-sm mt-2">Please wait while we complete the authentication process</div>
       </div>
     )
   }

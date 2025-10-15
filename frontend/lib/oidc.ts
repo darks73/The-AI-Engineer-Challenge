@@ -29,6 +29,7 @@ export interface AuthState {
   token: string | null;
   refreshToken: string | null;
   isLoggingOut: boolean;
+  isLoggingIn: boolean;
 }
 
 class OIDCAuthService {
@@ -37,6 +38,7 @@ class OIDCAuthService {
   private idToken: string | null = null;
   private user: UserInfo | null = null;
   private isLoggingOut: boolean = false;
+  private isLoggingIn: boolean = false;
   private listeners: ((state: AuthState) => void)[] = [];
 
   constructor() {
@@ -94,7 +96,8 @@ class OIDCAuthService {
       user: this.user,
       token: this.token,
       refreshToken: this.refreshToken,
-      isLoggingOut: this.isLoggingOut
+      isLoggingOut: this.isLoggingOut,
+      isLoggingIn: this.isLoggingIn
     };
     
     this.listeners.forEach(listener => listener(state));
@@ -149,6 +152,10 @@ class OIDCAuthService {
 
   async handleCallback(code: string, state: string): Promise<void> {
     try {
+      // Set login loading state
+      this.isLoggingIn = true;
+      this.notifyListeners();
+
       // Verify state parameter
       const storedState = sessionStorage.getItem('oidc_state');
       if (state !== storedState) {
@@ -245,11 +252,15 @@ class OIDCAuthService {
       this.setStoredToken(this.token, this.refreshToken);
       this.setStoredUser(this.user);
 
-      // Notify listeners
+      // Clear login loading state and notify listeners
+      this.isLoggingIn = false;
       this.notifyListeners();
 
     } catch (error) {
       console.error('OIDC callback error:', error);
+      // Clear login loading state on error
+      this.isLoggingIn = false;
+      this.notifyListeners();
       throw error;
     }
   }
