@@ -144,19 +144,41 @@ class ClaudeProvider(AIProvider):
         
         return claude_messages
     
-    def _convert_content(self, content: Any) -> str:
-        """Convert OpenAI content format to Claude text format."""
+    def _convert_content(self, content: Any) -> str | list:
+        """Convert OpenAI content format to Claude format (text or multimodal)."""
         if isinstance(content, str):
             return content
         elif isinstance(content, list):
             # Handle multimodal content (text + images)
-            text_parts = []
+            claude_content = []
             for item in content:
                 if item.get("type") == "text":
-                    text_parts.append(item["text"])
-                # Note: Claude image handling would need additional implementation
-                # For now, we'll focus on text-only responses
-            return " ".join(text_parts)
+                    claude_content.append({
+                        "type": "text",
+                        "text": item["text"]
+                    })
+                elif item.get("type") == "image_url":
+                    # Convert OpenAI image format to Claude format
+                    image_url = item["image_url"]["url"]
+                    if image_url.startswith("data:image"):
+                        # Extract media type and base64 data from data URL
+                        header, base64_data = image_url.split(",", 1)
+                        media_type = header.split(":")[1].split(";")[0]
+                        
+                        claude_content.append({
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": media_type,
+                                "data": base64_data
+                            }
+                        })
+            
+            # Return as list if multimodal, otherwise return text only
+            if len(claude_content) == 1 and claude_content[0]["type"] == "text":
+                return claude_content[0]["text"]
+            else:
+                return claude_content
         else:
             return str(content)
     
