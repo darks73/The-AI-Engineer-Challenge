@@ -10,12 +10,25 @@ function AppContent() {
   const [initialLoad, setInitialLoad] = useState(true)
 
   useEffect(() => {
-    // Give a brief moment for authentication state to settle
-    const timer = setTimeout(() => {
-      setInitialLoad(false)
-    }, 500)
+    // Check if we're coming from a callback
+    const referrer = typeof window !== 'undefined' ? document.referrer : ''
+    const isFromCallback = referrer.includes('/auth/callback')
     
-    return () => clearTimeout(timer)
+    if (isFromCallback) {
+      // If coming from callback, wait longer for authentication to settle
+      const timer = setTimeout(() => {
+        setInitialLoad(false)
+      }, 1500)
+      
+      return () => clearTimeout(timer)
+    } else {
+      // Normal loading, shorter delay
+      const timer = setTimeout(() => {
+        setInitialLoad(false)
+      }, 300)
+      
+      return () => clearTimeout(timer)
+    }
   }, [])
 
   if (isLoading || initialLoad) {
