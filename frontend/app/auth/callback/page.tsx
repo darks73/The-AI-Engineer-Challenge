@@ -8,7 +8,7 @@ import { LogIn, AlertCircle } from 'lucide-react'
 function AuthCallbackContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
+  const [status, setStatus] = useState<'loading' | 'error'>('loading')
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -42,12 +42,9 @@ function AuthCallbackContent() {
         console.log('Starting OIDC callback handling...')
         await oidcAuth.handleCallback(code, state || '')
         console.log('OIDC callback completed successfully')
-        setStatus('success')
-
-        // Redirect to main app after successful authentication
-        setTimeout(() => {
-          router.push('/')
-        }, 1000)
+        
+        // Redirect immediately to main app
+        router.push('/')
 
       } catch (err) {
         console.error('Auth callback error:', err)
@@ -78,21 +75,6 @@ function AuthCallbackContent() {
           </>
         )}
 
-        {status === 'success' && (
-          <>
-            <div className="w-16 h-16 mx-auto bg-green-500 rounded-full flex items-center justify-center">
-              <LogIn size={24} className="text-white" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-xl font-semibold text-dark-text">
-                Sign in successful!
-              </h2>
-              <p className="text-dark-text-secondary">
-                Redirecting to the chat...
-              </p>
-            </div>
-          </>
-        )}
 
         {status === 'error' && (
           <>
