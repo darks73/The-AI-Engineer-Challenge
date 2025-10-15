@@ -5,14 +5,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 # Import Pydantic for data validation and settings management
 from pydantic import BaseModel
-# Import OpenAI client for interacting with OpenAI's API
-from openai import OpenAI
 import os
 import base64
 import io
 import asyncio
 from typing import Optional, List
 from auth import oidc_auth
+from providers import ProviderFactory, get_all_supported_models
 
 # Load environment variables from .env file (optional)
 try:
@@ -23,7 +22,7 @@ except ImportError:
     pass
 
 # Initialize FastAPI application with a title
-app = FastAPI(title="OpenAI Chat API")
+app = FastAPI(title="AI Chat API")
 
 # Configure CORS (Cross-Origin Resource Sharing) middleware
 # This allows the API to be accessed from different domains/origins
@@ -82,8 +81,9 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 class ChatRequest(BaseModel):
     developer_message: str  # Message from the developer/system
     user_message: str      # Message from the user
-    model: Optional[str] = "gpt-4o-mini"  # Updated to support vision
-    api_key: Optional[str] = None  # OpenAI API key for authentication (optional, can use default)
+    model: Optional[str] = "gpt-4o-mini"  # Model to use for completion
+    provider: Optional[str] = "openai"  # AI provider: "openai" or "claude"
+    api_key: Optional[str] = None  # API key for authentication (optional, can use default)
     images: Optional[List[str]] = None  # Base64 encoded images
 
 # Define the main chat endpoint that handles POST requests
@@ -92,18 +92,22 @@ async def chat(request: ChatRequest, current_user: dict = Depends(get_current_us
     print(f"\n🔍 DEBUG: Chat endpoint called")
     print(f"🔍 DEBUG: Request data: {request}")
     print(f"🔍 DEBUG: Current user: {current_user}")
+    
     try:
-        # Use provided API key or fall back to environment variable
-        api_key = request.api_key or os.environ.get("OPENAI_API_KEY")
+        # Get API key for the specified provider
+        api_key = ProviderFactory.get_provider_api_key(request.provider, request.api_key)
         
-        if not api_key:
+        # Create the appropriate provider instance
+        provider = ProviderFactory.create_provider(request.provider, api_key)
+        
+        # Validate the model for the provider
+        if not provider.validate_model(request.model):
+            supported_models = provider.get_supported_models()
             raise HTTPException(
-                status_code=400, 
-                detail="❌ OpenAI API Key Required: No API key was provided in the request and no OPENAI_API_KEY environment variable is set. Please either: 1) Add your API key in the frontend settings, or 2) Set the OPENAI_API_KEY environment variable on the server. Get your API key from: https://platform.openai.com/api-keys"
+                status_code=400,
+                detail=f"❌ Invalid model '{request.model}' for provider '{request.provider}'. "
+                       f"Supported models: {', '.join(supported_models)}"
             )
-        
-        # Initialize OpenAI client with the API key
-        client = OpenAI(api_key=api_key)
         
         # Create an async generator function for streaming responses
         async def generate():
@@ -115,7 +119,7 @@ async def chat(request: ChatRequest, current_user: dict = Depends(get_current_us
             # Prepare user message content
             user_content = [{"type": "text", "text": request.user_message}]
             
-            # Add images if provided
+            # Add images if provided (OpenAI format)
             if request.images:
                 for image_base64 in request.images:
                     user_content.append({
@@ -130,46 +134,59 @@ async def chat(request: ChatRequest, current_user: dict = Depends(get_current_us
                 "content": user_content
             })
             
-            # Create a streaming chat completion request
-            stream = client.chat.completions.create(
-                model=request.model,
+            # Stream the response using the provider
+            async for chunk in provider.stream_chat_completion(
                 messages=messages,
-                stream=True,  # Enable streaming response
-                max_tokens=4000  # Increase token limit for vision
-            )
-            
-            # Yield each chunk of the response as it becomes available
-            for chunk in stream:
-                if chunk.choices[0].delta.content is not None:
-                    yield chunk.choices[0].delta.content
+                model=request.model,
+                max_tokens=4000
+            ):
+                yield chunk
 
         # Return a streaming response to the client
         return StreamingResponse(generate(), media_type="text/plain")
     
+    except ValueError as e:
+        # Handle API key or model validation errors
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        # Handle any errors that occur during processing
+        # Handle any other errors that occur during processing
+        print(f"❌ Chat endpoint error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # Define a root endpoint for testing
 @app.get("/")
 async def root():
-    return {"message": "FastAPI backend is running!", "endpoints": ["/api/health", "/api/chat", "/api/debug"]}
+    return {"message": "AI Chat API is running!", "endpoints": ["/api/health", "/api/chat", "/api/models", "/api/debug"]}
 
 # Debug endpoint to check environment variables
 @app.get("/api/debug")
 async def debug_env():
     """Debug endpoint to check environment variable status"""
-    api_key_status = "SET" if os.environ.get("OPENAI_API_KEY") else "NOT SET"
-    api_key_preview = os.environ.get("OPENAI_API_KEY", "")[:20] + "..." if os.environ.get("OPENAI_API_KEY") else "None"
+    openai_key_status = "SET" if os.environ.get("OPENAI_API_KEY") else "NOT SET"
+    openai_key_preview = os.environ.get("OPENAI_API_KEY", "")[:20] + "..." if os.environ.get("OPENAI_API_KEY") else "None"
+    
+    claude_key_status = "SET" if os.environ.get("CLAUDE_API_KEY") else "NOT SET"
+    claude_key_preview = os.environ.get("CLAUDE_API_KEY", "")[:20] + "..." if os.environ.get("CLAUDE_API_KEY") else "None"
     
     return {
         "OPENAI_API_KEY": {
-            "status": api_key_status,
-            "preview": api_key_preview,
+            "status": openai_key_status,
+            "preview": openai_key_preview,
             "length": len(os.environ.get("OPENAI_API_KEY", "")) if os.environ.get("OPENAI_API_KEY") else 0
         },
-        "all_env_vars": {k: v for k, v in os.environ.items() if "OPENAI" in k or "API" in k}
+        "CLAUDE_API_KEY": {
+            "status": claude_key_status,
+            "preview": claude_key_preview,
+            "length": len(os.environ.get("CLAUDE_API_KEY", "")) if os.environ.get("CLAUDE_API_KEY") else 0
+        },
+        "all_env_vars": {k: v for k, v in os.environ.items() if "OPENAI" in k or "CLAUDE" in k or "API" in k}
     }
+
+# Get available models endpoint
+@app.get("/api/models")
+async def get_models():
+    """Get all available models grouped by provider"""
+    return get_all_supported_models()
 
 # Define a health check endpoint to verify API status
 @app.get("/api/health")
