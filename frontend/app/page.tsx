@@ -1,37 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { AuthProvider, useAuth } from '../contexts/AuthContext'
 import ChatInterface from '@/components/ChatInterface'
 import LoginScreen from '@/components/LoginScreen'
 
 function AppContent() {
   const { isAuthenticated, isLoading, isLoggingOut, isLoggingIn } = useAuth()
-  const [initialLoad, setInitialLoad] = useState(true)
 
-  useEffect(() => {
-    // Check if we're coming from a callback
-    const referrer = typeof window !== 'undefined' ? document.referrer : ''
-    const isFromCallback = referrer.includes('/auth/callback')
-    
-    if (isFromCallback) {
-      // If coming from callback, wait longer for authentication to settle
-      const timer = setTimeout(() => {
-        setInitialLoad(false)
-      }, 1500)
-      
-      return () => clearTimeout(timer)
-    } else {
-      // Normal loading, shorter delay
-      const timer = setTimeout(() => {
-        setInitialLoad(false)
-      }, 300)
-      
-      return () => clearTimeout(timer)
-    }
-  }, [])
-
-  if (isLoading || initialLoad) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-dark-bg">
         <div className="text-dark-text">Loading...</div>
