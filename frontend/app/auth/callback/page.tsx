@@ -55,8 +55,8 @@ function AuthCallbackContent() {
           attempts++
         }
         
-        // Redirect to main app - authentication should now be confirmed
-        router.push('/')
+        // Use replace instead of push to avoid back button issues
+        router.replace('/')
 
       } catch (err) {
         console.error('Auth callback error:', err)
