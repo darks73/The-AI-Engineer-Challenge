@@ -43,17 +43,8 @@ function AuthCallbackContent() {
         await oidcAuth.handleCallback(code, state || '')
         console.log('OIDC callback completed successfully')
         
-        // Set login loading state before redirecting
-        oidcAuth.setLoggingInState(true)
-        
-        // Redirect immediately to main app
+        // Redirect to main app - the authentication state will be updated
         router.push('/')
-        
-        // Clear login loading state after redirect (give time for main app to render)
-        setTimeout(() => {
-          console.log('🔍 Clearing login loading state after redirect...')
-          oidcAuth.setLoggingInState(false)
-        }, 1000)
 
       } catch (err) {
         console.error('Auth callback error:', err)

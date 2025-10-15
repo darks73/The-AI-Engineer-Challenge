@@ -1,11 +1,45 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { AuthProvider, useAuth } from '../contexts/AuthContext'
 import ChatInterface from '@/components/ChatInterface'
 import LoginScreen from '@/components/LoginScreen'
 
 function AppContent() {
   const { isAuthenticated, isLoading, isLoggingOut, isLoggingIn } = useAuth()
+  const [isTransitioningFromCallback, setIsTransitioningFromCallback] = useState(false)
+
+  useEffect(() => {
+    // Check if we're coming from a callback by looking at the referrer
+    if (typeof window !== 'undefined') {
+      const referrer = document.referrer
+      const isFromCallback = referrer.includes('/auth/callback')
+      
+      if (isFromCallback && !isAuthenticated) {
+        console.log('🔍 Coming from callback, showing transition loading...')
+        setIsTransitioningFromCallback(true)
+        
+        // Clear the transition state when authenticated
+        const checkAuth = () => {
+          if (isAuthenticated) {
+            console.log('🔍 Authentication confirmed, hiding transition loading...')
+            setIsTransitioningFromCallback(false)
+          } else {
+            setTimeout(checkAuth, 100)
+          }
+        }
+        
+        // Start checking
+        setTimeout(checkAuth, 100)
+        
+        // Fallback timeout
+        setTimeout(() => {
+          console.log('🔍 Fallback timeout, hiding transition loading...')
+          setIsTransitioningFromCallback(false)
+        }, 3000)
+      }
+    }
+  }, [isAuthenticated])
 
   if (isLoading) {
     return (
@@ -25,7 +59,7 @@ function AppContent() {
     )
   }
 
-  if (isLoggingIn) {
+  if (isLoggingIn || isTransitioningFromCallback) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-dark-bg">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mb-4"></div>
