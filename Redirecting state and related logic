@@ -1,0 +1,51 @@
+[1mdiff --git a/frontend/components/LoginScreen.tsx b/frontend/components/LoginScreen.tsx[m
+[1mindex 564bcc6..248b859 100644[m
+[1m--- a/frontend/components/LoginScreen.tsx[m
+[1m+++ b/frontend/components/LoginScreen.tsx[m
+[36m@@ -1,46 +1,19 @@[m
+ 'use client'[m
+ [m
+[31m-import { useState } from 'react'[m
+ import { useAuth } from '../contexts/AuthContext'[m
+ import { LogIn } from 'lucide-react'[m
+ [m
+ export default function LoginScreen() {[m
+   const { login, isLoading } = useAuth()[m
+[31m-  const [isRedirecting, setIsRedirecting] = useState(false)[m
+ [m
+   const handleLogin = async () => {[m
+     try {[m
+[31m-      setIsRedirecting(true)[m
+[31m-      // Small delay to show the "Completing sign in..." state[m
+[31m-      await new Promise(resolve => setTimeout(resolve, 500))[m
+       await login()[m
+     } catch (error) {[m
+       console.error('Login failed:', error)[m
+[31m-      setIsRedirecting(false)[m
+     }[m
+   }[m
+ [m
+[31m-  // Show "Completing sign in..." state[m
+[31m-  if (isRedirecting) {[m
+[31m-    return ([m
+[31m-      <div className="flex flex-col items-center justify-center h-screen bg-dark-bg">[m
+[31m-        <div className="text-center space-y-6 max-w-md mx-auto p-8">[m
+[31m-          <div className="w-16 h-16 mx-auto bg-blue-500 rounded-full flex items-center justify-center animate-spin">[m
+[31m-            <LogIn size={24} className="text-white" />[m
+[31m-          </div>[m
+[31m-          <div className="space-y-2">[m
+[31m-            <h2 className="text-xl font-semibold text-dark-text">[m
+[31m-              Completing sign in...[m
+[31m-            </h2>[m
+[31m-            <p className="text-dark-text-secondary">[m
+[31m-              Please wait while we redirect you to sign in.[m
+[31m-            </p>[m
+[31m-          </div>[m
+[31m-        </div>[m
+[31m-      </div>[m
+[31m-    )[m
+[31m-  }[m
+[31m-[m
+   return ([m
+     <div className="flex flex-col items-center justify-center h-screen bg-dark-bg">[m
+       <div className="text-center space-y-8 max-w-md mx-auto p-8">[m

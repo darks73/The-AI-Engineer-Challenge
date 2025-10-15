@@ -1,44 +1,17 @@
 'use client'
 
-import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { LogIn } from 'lucide-react'
 
 export default function LoginScreen() {
   const { login, isLoading } = useAuth()
-  const [isRedirecting, setIsRedirecting] = useState(false)
 
   const handleLogin = async () => {
     try {
-      setIsRedirecting(true)
-      // Small delay to show the "Completing sign in..." state
-      await new Promise(resolve => setTimeout(resolve, 500))
       await login()
     } catch (error) {
       console.error('Login failed:', error)
-      setIsRedirecting(false)
     }
-  }
-
-  // Show "Completing sign in..." state
-  if (isRedirecting) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen bg-dark-bg">
-        <div className="text-center space-y-6 max-w-md mx-auto p-8">
-          <div className="w-16 h-16 mx-auto bg-blue-500 rounded-full flex items-center justify-center animate-spin">
-            <LogIn size={24} className="text-white" />
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-xl font-semibold text-dark-text">
-              Completing sign in...
-            </h2>
-            <p className="text-dark-text-secondary">
-              Please wait while we redirect you to sign in.
-            </p>
-          </div>
-        </div>
-      </div>
-    )
   }
 
   return (
