@@ -219,6 +219,10 @@ export default function ChatInterface() {
                 }
                 
                 return // Success - exit early
+              } else {
+                // Retry also failed, get error details
+                const errorText = await retryResponse.text()
+                throw new Error(`Retry failed: ${retryResponse.status} - ${errorText}`)
               }
             }
           }
@@ -229,7 +233,16 @@ export default function ChatInterface() {
           return
         }
         
-        throw new Error(`HTTP error! status: ${response.status}`)
+        // Handle other HTTP errors (400, 500, etc.)
+        let errorMessage = `HTTP error! status: ${response.status}`
+        try {
+          const errorText = await response.text()
+          errorMessage += ` - ${errorText}`
+        } catch (e) {
+          // Ignore if we can't read the error text
+        }
+        
+        throw new Error(errorMessage)
       }
 
       const reader = response.body?.getReader()
@@ -247,23 +260,34 @@ export default function ChatInterface() {
       setMessages(prev => [...prev, assistantMessage])
 
       let buffer = ''
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
+      const timeout = setTimeout(() => {
+        reader.cancel()
+        throw new Error('Request timeout - no response received')
+      }, 30000) // 30 second timeout
 
-        const chunk = new TextDecoder().decode(value)
-        if (chunk) {
-          buffer += chunk
-          
-          // Update the message content with the current buffer
-          setMessages(prev => 
-            prev.map(msg => 
-              msg.id === assistantMessage.id 
-                ? { ...msg, content: buffer }
-                : msg
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const chunk = new TextDecoder().decode(value)
+          if (chunk) {
+            buffer += chunk
+            
+            // Update the message content with the current buffer
+            setMessages(prev => 
+              prev.map(msg => 
+                msg.id === assistantMessage.id 
+                  ? { ...msg, content: buffer }
+                  : msg
+              )
             )
-          )
+          }
         }
+        clearTimeout(timeout)
+      } catch (streamError) {
+        clearTimeout(timeout)
+        throw streamError
       }
 
     } catch (error) {
@@ -276,14 +300,29 @@ export default function ChatInterface() {
           : msg
       ))
       
+      // Show user-friendly error message
+      let errorText = 'Failed to get response'
+      if (error instanceof Error) {
+        if (error.message.includes('timeout')) {
+          errorText = 'Request timed out. Please try again.'
+        } else if (error.message.includes('400')) {
+          errorText = 'Invalid request. Please check your settings and try again.'
+        } else if (error.message.includes('500')) {
+          errorText = 'Server error. Please try again later.'
+        } else {
+          errorText = error.message
+        }
+      }
+      
       const errorMessage: Message = {
         id: (Date.now() + 2).toString(),
         role: 'assistant',
-        content: `Error: ${error instanceof Error ? error.message : 'Failed to get response'}`,
+        content: `❌ Error: ${errorText}`,
         timestamp: new Date()
       }
       setMessages(prev => [...prev, errorMessage])
     } finally {
+      // Always reset loading state
       setIsLoading(false)
     }
   }
