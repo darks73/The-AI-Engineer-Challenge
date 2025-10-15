@@ -4,11 +4,12 @@ import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { oidcAuth } from '../../../lib/oidc'
 import { LogIn, AlertCircle } from 'lucide-react'
+import ChatInterface from '../../../components/ChatInterface'
 
 function AuthCallbackContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [status, setStatus] = useState<'loading' | 'error'>('loading')
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -55,8 +56,8 @@ function AuthCallbackContent() {
           attempts++
         }
         
-        // Use replace instead of push to avoid back button issues
-        router.replace('/')
+        // Instead of redirecting, directly render the chat interface
+        setStatus('success')
 
       } catch (err) {
         console.error('Auth callback error:', err)
@@ -87,6 +88,9 @@ function AuthCallbackContent() {
           </>
         )}
 
+        {status === 'success' && (
+          <ChatInterface />
+        )}
 
         {status === 'error' && (
           <>
