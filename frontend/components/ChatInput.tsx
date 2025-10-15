@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Mic, Send, Paperclip, X, Image, MicOff } from 'lucide-react'
+import { Mic, Send, Paperclip, X, Image, MicOff, Square } from 'lucide-react'
 import ModelSelector from './ModelSelector'
 
 interface ChatInputProps {
@@ -15,9 +15,12 @@ interface ChatInputProps {
   model: string
   onProviderChange: (provider: 'openai' | 'claude') => void
   onModelChange: (model: string) => void
+  // Abort functionality
+  isLoading?: boolean
+  onAbortRequest?: () => void
 }
 
-export default function ChatInput({ onSendMessage, disabled = false, attachments, onFileUpload, onRemoveAttachment, provider, model, onProviderChange, onModelChange }: ChatInputProps) {
+export default function ChatInput({ onSendMessage, disabled = false, attachments, onFileUpload, onRemoveAttachment, provider, model, onProviderChange, onModelChange, isLoading = false, onAbortRequest }: ChatInputProps) {
   const [message, setMessage] = useState('')
   const [isListening, setIsListening] = useState(false)
   const [isVoiceSupported, setIsVoiceSupported] = useState(false)
@@ -233,15 +236,26 @@ export default function ChatInput({ onSendMessage, disabled = false, attachments
             {isListening ? <MicOff size={20} /> : <Mic size={20} />}
           </button>
 
-          {/* Send button */}
-          <button
-            type="submit"
-            disabled={!message.trim() || disabled}
-            className="chat-button disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Send message"
-          >
-            <Send size={20} />
-          </button>
+          {/* Send/Stop button */}
+          {isLoading ? (
+            <button
+              type="button"
+              onClick={onAbortRequest}
+              className="chat-button bg-red-600 hover:bg-red-700"
+              title="Stop request"
+            >
+              <Square size={20} />
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={!message.trim() || disabled}
+              className="chat-button disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Send message"
+            >
+              <Send size={20} />
+            </button>
+          )}
         </div>
       </form>
     </div>

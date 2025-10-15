@@ -83,6 +83,7 @@ export default function ChatInterface() {
     userInitials: 'U'
   })
   const [hasCustomInitials, setHasCustomInitials] = useState(false)
+  const [abortController, setAbortController] = useState<AbortController | null>(null)
 
   // Update initials when user becomes available, but only if not manually set
   useEffect(() => {
@@ -125,6 +126,10 @@ export default function ChatInterface() {
 
     setIsLoading(true)
 
+    // Create abort controller for this request
+    const controller = new AbortController()
+    setAbortController(controller)
+
     try {
       // Mark user message as sent
       setMessages(prev => prev.map(msg => 
@@ -153,6 +158,7 @@ export default function ChatInterface() {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`,
             },
+            signal: controller.signal,
         body: JSON.stringify({
           developer_message: settings.developerMessage,
           user_message: content.trim(),
@@ -180,6 +186,7 @@ export default function ChatInterface() {
                   'Content-Type': 'application/json',
                   'Authorization': `Bearer ${newToken}`,
                 },
+                signal: controller.signal,
                 body: JSON.stringify({
                   developer_message: settings.developerMessage,
                   user_message: content.trim(),
@@ -293,6 +300,13 @@ export default function ChatInterface() {
     } catch (error) {
       console.error('Error sending message:', error)
       
+      // Check if request was aborted
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('Request was aborted by user')
+        // Don't show error message for user-initiated abort
+        return
+      }
+      
       // Mark user message as failed
       setMessages(prev => prev.map(msg => 
         msg.id === userMessage.id 
@@ -322,8 +336,9 @@ export default function ChatInterface() {
       }
       setMessages(prev => [...prev, errorMessage])
     } finally {
-      // Always reset loading state
+      // Always reset loading state and clear abort controller
       setIsLoading(false)
+      setAbortController(null)
     }
   }
 
@@ -352,6 +367,13 @@ export default function ChatInterface() {
       ...prev,
       model: newModel
     }))
+  }
+
+  const handleAbortRequest = () => {
+    if (abortController) {
+      console.log('Aborting request...')
+      abortController.abort()
+    }
   }
 
   const handleFileUpload = (files: File[]) => {
@@ -473,6 +495,8 @@ export default function ChatInterface() {
           model={settings.model}
           onProviderChange={handleProviderChange}
           onModelChange={handleModelChange}
+          isLoading={isLoading}
+          onAbortRequest={handleAbortRequest}
         />
       </div>
 
