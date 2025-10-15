@@ -23,7 +23,14 @@ export default function ChatMessages({ messages, isLoading, userInitials, onRetr
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    // Find the scrollable chat container (parent with chat-scroll class)
+    const chatContainer = messagesEndRef.current?.closest('.chat-scroll')
+    if (chatContainer) {
+      chatContainer.scrollTop = chatContainer.scrollHeight
+    } else {
+      // Fallback to scrollIntoView if container not found
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
   }
 
   useEffect(() => {
