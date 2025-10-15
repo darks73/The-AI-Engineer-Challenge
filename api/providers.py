@@ -104,14 +104,13 @@ class ClaudeProvider(AIProvider):
     ) -> AsyncGenerator[str, None]:
         """Stream Claude chat completion responses."""
         try:
-            # Convert OpenAI-style messages to Claude format
-            claude_messages = self._convert_messages(messages)
-            
             # Extract system message if present
             system_message = ""
             if messages and messages[0].get("role") == "system":
                 system_message = messages[0]["content"]
-                claude_messages = claude_messages[1:]  # Remove system message from messages
+            
+            # Convert OpenAI-style messages to Claude format (this already filters out system messages)
+            claude_messages = self._convert_messages(messages)
             
             stream = self.client.messages.create(
                 model=model,
