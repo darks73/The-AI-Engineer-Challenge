@@ -53,31 +53,31 @@ const MODELS: ModelInfo[] = [
   
   // Claude Models
   {
-    id: 'claude-3-5-sonnet-20241022',
+    id: 'claude-3-5-sonnet',
     name: 'Claude 3.5 Sonnet',
     description: 'Most capable Claude model',
     provider: 'claude'
   },
   {
-    id: 'claude-3-5-haiku-20241022',
+    id: 'claude-3-5-haiku',
     name: 'Claude 3.5 Haiku',
     description: 'Fast and efficient Claude model',
     provider: 'claude'
   },
   {
-    id: 'claude-3-opus-20240229',
+    id: 'claude-3-opus',
     name: 'Claude 3 Opus',
     description: 'Most powerful reasoning',
     provider: 'claude'
   },
   {
-    id: 'claude-3-sonnet-20240229',
+    id: 'claude-3-sonnet',
     name: 'Claude 3 Sonnet',
     description: 'Balanced performance and speed',
     provider: 'claude'
   },
   {
-    id: 'claude-3-haiku-20240307',
+    id: 'claude-3-haiku',
     name: 'Claude 3 Haiku',
     description: 'Fast and lightweight',
     provider: 'claude'
