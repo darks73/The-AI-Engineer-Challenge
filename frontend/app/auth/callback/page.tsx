@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { oidcAuth } from '../../../lib/oidc'
 import { LogIn, AlertCircle } from 'lucide-react'
 import ChatInterface from '../../../components/ChatInterface'
+import { AuthProvider } from '../../../contexts/AuthContext'
 
 function AuthCallbackContent() {
   const router = useRouter()
@@ -89,7 +90,9 @@ function AuthCallbackContent() {
         )}
 
         {status === 'success' && (
-          <ChatInterface />
+          <AuthProvider>
+            <ChatInterface />
+          </AuthProvider>
         )}
 
         {status === 'error' && (
