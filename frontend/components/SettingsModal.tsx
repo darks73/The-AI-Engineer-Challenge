@@ -147,9 +147,7 @@ export default function SettingsModal({ settings, onSave, onClose }: SettingsMod
                 </>
               ) : (
                 <>
-                  <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku (Fast and efficient)</option>
-                  <option value="claude-3-opus-20240229">Claude 3 Opus (Most powerful reasoning)</option>
-                  <option value="claude-3-sonnet-20240229">Claude 3 Sonnet (Balanced performance)</option>
+                  <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku (Latest and most capable)</option>
                   <option value="claude-3-haiku-20240307">Claude 3 Haiku (Fast and lightweight)</option>
                 </>
               )}
