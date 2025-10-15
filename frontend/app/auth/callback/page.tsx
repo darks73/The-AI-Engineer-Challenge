@@ -48,6 +48,12 @@ function AuthCallbackContent() {
         
         // Redirect immediately to main app
         router.push('/')
+        
+        // Clear login loading state after redirect (give time for main app to render)
+        setTimeout(() => {
+          console.log('🔍 Clearing login loading state after redirect...')
+          oidcAuth.setLoggingInState(false)
+        }, 1000)
 
       } catch (err) {
         console.error('Auth callback error:', err)
