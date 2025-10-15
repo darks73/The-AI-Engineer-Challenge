@@ -122,8 +122,8 @@ class ClaudeProvider(AIProvider):
             )
             
             for event in stream:
-                if isinstance(event, MessageStreamEvent) and hasattr(event, 'delta'):
-                    if hasattr(event.delta, 'text') and event.delta.text:
+                if hasattr(event, 'type') and event.type == 'content_block_delta':
+                    if hasattr(event, 'delta') and hasattr(event.delta, 'text'):
                         yield event.delta.text
                         
         except Exception as e:
