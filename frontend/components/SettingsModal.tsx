@@ -7,6 +7,7 @@ interface ChatSettings {
   apiKey: string
   developerMessage: string
   model: string
+  provider: 'openai' | 'claude'
   userInitials: string
 }
 
@@ -31,6 +32,15 @@ export default function SettingsModal({ settings, onSave, onClose }: SettingsMod
 
   const handleChange = (field: keyof ChatSettings, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleProviderChange = (provider: 'openai' | 'claude') => {
+    setFormData(prev => ({ 
+      ...prev, 
+      provider,
+      apiKey: '', // Clear API key when switching providers
+      model: provider === 'openai' ? 'gpt-4o-mini' : 'claude-3-5-sonnet-20241022'
+    }))
   }
 
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -58,10 +68,41 @@ export default function SettingsModal({ settings, onSave, onClose }: SettingsMod
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Provider Selection */}
+          <div>
+            <label htmlFor="provider" className="block text-sm font-medium text-dark-text mb-2">
+              AI Provider
+            </label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => handleProviderChange('openai')}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border transition-colors ${
+                  formData.provider === 'openai'
+                    ? 'bg-accent border-accent text-white'
+                    : 'bg-dark-surface border-dark-border text-dark-text hover:bg-dark-border'
+                }`}
+              >
+                <span className="text-sm font-medium">OpenAI</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleProviderChange('claude')}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border transition-colors ${
+                  formData.provider === 'claude'
+                    ? 'bg-blue-600 border-blue-600 text-white'
+                    : 'bg-dark-surface border-dark-border text-dark-text hover:bg-dark-border'
+                }`}
+              >
+                <span className="text-sm font-medium">Claude</span>
+              </button>
+            </div>
+          </div>
+
           {/* API Key */}
           <div>
             <label htmlFor="apiKey" className="block text-sm font-medium text-dark-text mb-2">
-              OpenAI API Key (Optional)
+              {formData.provider === 'openai' ? 'OpenAI' : 'Claude'} API Key (Optional)
             </label>
             <div className="relative">
               <input
@@ -70,7 +111,7 @@ export default function SettingsModal({ settings, onSave, onClose }: SettingsMod
                 value={formData.apiKey}
                 onChange={(e) => handleChange('apiKey', e.target.value)}
                 className="chat-input w-full pr-10"
-                placeholder="Enter your OpenAI API key (or leave blank to use default)"
+                placeholder={`Enter your ${formData.provider === 'openai' ? 'OpenAI' : 'Claude'} API key (or leave blank to use default)`}
               />
               <button
                 type="button"
@@ -96,11 +137,23 @@ export default function SettingsModal({ settings, onSave, onClose }: SettingsMod
               onChange={(e) => handleChange('model', e.target.value)}
               className="chat-input w-full"
             >
-              <option value="gpt-4o-mini">GPT-4o Mini (Supports Images)</option>
-              <option value="gpt-4o">GPT-4o (Supports Images)</option>
-              <option value="gpt-4-turbo">GPT-4 Turbo (Supports Images)</option>
-              <option value="gpt-4">GPT-4</option>
-              <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+              {formData.provider === 'openai' ? (
+                <>
+                  <option value="gpt-4o-mini">GPT-4o Mini (Supports Images)</option>
+                  <option value="gpt-4o">GPT-4o (Supports Images)</option>
+                  <option value="gpt-4-turbo">GPT-4 Turbo (Supports Images)</option>
+                  <option value="gpt-4">GPT-4</option>
+                  <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                </>
+              ) : (
+                <>
+                  <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet (Most capable)</option>
+                  <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku (Fast and efficient)</option>
+                  <option value="claude-3-opus-20240229">Claude 3 Opus (Most powerful reasoning)</option>
+                  <option value="claude-3-sonnet-20240229">Claude 3 Sonnet (Balanced performance)</option>
+                  <option value="claude-3-haiku-20240307">Claude 3 Haiku (Fast and lightweight)</option>
+                </>
+              )}
             </select>
           </div>
 

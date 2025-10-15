@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import ChatInput from './ChatInput'
 import ChatMessages from './ChatMessages'
 import SettingsModal from './SettingsModal'
+import ModelSelector from './ModelSelector'
 import { useAuth } from '../contexts/AuthContext'
 import { oidcAuth } from '../lib/oidc'
 import { Plus, Settings, LogOut } from 'lucide-react'
@@ -21,6 +22,7 @@ interface ChatSettings {
   apiKey: string
   developerMessage: string
   model: string
+  provider: 'openai' | 'claude'
   userInitials: string
 }
 
@@ -77,6 +79,7 @@ export default function ChatInterface() {
     apiKey: '',
     developerMessage: 'You are a joyful AI assistant.',
     model: 'gpt-4o-mini',
+    provider: 'openai',
     userInitials: 'U'
   })
   const [hasCustomInitials, setHasCustomInitials] = useState(false)
@@ -154,6 +157,7 @@ export default function ChatInterface() {
           developer_message: settings.developerMessage,
           user_message: content.trim(),
           model: settings.model,
+          provider: settings.provider,
           api_key: settings.apiKey.trim() || null,
           images: imageBase64s.length > 0 ? imageBase64s : undefined
         })
@@ -180,6 +184,7 @@ export default function ChatInterface() {
                   developer_message: settings.developerMessage,
                   user_message: content.trim(),
                   model: settings.model,
+                  provider: settings.provider,
                   api_key: settings.apiKey.trim() || null,
                   images: imageBase64s.length > 0 ? imageBase64s : undefined
                 })
@@ -296,6 +301,20 @@ export default function ChatInterface() {
     setShowSettings(false)
   }
 
+  const handleProviderChange = (newProvider: 'openai' | 'claude') => {
+    setSettings(prev => ({
+      ...prev,
+      provider: newProvider
+    }))
+  }
+
+  const handleModelChange = (newModel: string) => {
+    setSettings(prev => ({
+      ...prev,
+      model: newModel
+    }))
+  }
+
   const handleFileUpload = (files: File[]) => {
     // Validate file types
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
@@ -368,28 +387,40 @@ export default function ChatInterface() {
             </div>
           )}
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={handleNewChat}
-            className="icon-button"
-            title="New Chat"
-          >
-            <Plus size={20} />
-          </button>
-          <button
-            onClick={() => setShowSettings(true)}
-            className="icon-button"
-            title="Settings"
-          >
-            <Settings size={20} />
-          </button>
-          <button
-            onClick={logout}
-            className="icon-button-red"
-            title="Logout"
-          >
-            <LogOut size={20} />
-          </button>
+        <div className="flex items-center gap-4">
+          {/* Model Selector */}
+          <ModelSelector
+            provider={settings.provider}
+            model={settings.model}
+            onProviderChange={handleProviderChange}
+            onModelChange={handleModelChange}
+            disabled={isLoading}
+          />
+          
+          {/* Action Buttons */}
+          <div className="flex gap-2">
+            <button
+              onClick={handleNewChat}
+              className="icon-button"
+              title="New Chat"
+            >
+              <Plus size={20} />
+            </button>
+            <button
+              onClick={() => setShowSettings(true)}
+              className="icon-button"
+              title="Settings"
+            >
+              <Settings size={20} />
+            </button>
+            <button
+              onClick={logout}
+              className="icon-button-red"
+              title="Logout"
+            >
+              <LogOut size={20} />
+            </button>
+          </div>
         </div>
       </div>
 
