@@ -358,7 +358,8 @@ export default function ChatInterface() {
   const handleProviderChange = (newProvider: 'openai' | 'claude') => {
     setSettings(prev => ({
       ...prev,
-      provider: newProvider
+      provider: newProvider,
+      model: newProvider === 'openai' ? 'gpt-4o-mini' : 'claude-3-5-sonnet-20241022'
     }))
   }
 
