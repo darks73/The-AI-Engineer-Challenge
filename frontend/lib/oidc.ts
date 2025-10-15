@@ -380,6 +380,11 @@ class OIDCAuthService {
       .replace(/\//g, '_')
       .replace(/=/g, '');
   }
+
+  setLoggingInState(loggingIn: boolean): void {
+    this.isLoggingIn = loggingIn;
+    this.notifyListeners();
+  }
 }
 
 // Export singleton instance
