@@ -359,7 +359,7 @@ export default function ChatInterface() {
     setSettings(prev => ({
       ...prev,
       provider: newProvider,
-      model: newProvider === 'openai' ? 'gpt-4o-mini' : 'claude-3-5-haiku-20241022'
+      model: newProvider === 'openai' ? 'gpt-4o-mini' : 'claude-haiku-4-5'
     }))
   }
 

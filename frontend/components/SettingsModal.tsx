@@ -39,7 +39,7 @@ export default function SettingsModal({ settings, onSave, onClose }: SettingsMod
       ...prev, 
       provider,
       apiKey: '', // Clear API key when switching providers
-      model: provider === 'openai' ? 'gpt-4o-mini' : 'claude-3-5-sonnet-20241022'
+      model: provider === 'openai' ? 'gpt-4o-mini' : 'claude-haiku-4-5'
     }))
   }
 
@@ -147,7 +147,8 @@ export default function SettingsModal({ settings, onSave, onClose }: SettingsMod
                 </>
               ) : (
                 <>
-                  <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku (Latest and most capable)</option>
+                  <option value="claude-haiku-4-5">Claude Haiku 4.5 (Latest - Fast, intelligent, cost-effective)</option>
+                  <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku (Previous generation)</option>
                   <option value="claude-3-haiku-20240307">Claude 3 Haiku (Fast and lightweight)</option>
                 </>
               )}

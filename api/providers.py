@@ -185,8 +185,9 @@ class ClaudeProvider(AIProvider):
     def get_supported_models(self) -> List[str]:
         """Get supported Claude models."""
         return [
-            "claude-3-5-haiku-20241022", 
-            "claude-3-haiku-20240307"
+            "claude-haiku-4-5",           # Latest Haiku 4.5 (Oct 2025)
+            "claude-3-5-haiku-20241022",  # Previous Haiku model
+            "claude-3-haiku-20240307"     # Older Haiku model
         ]
     
     def validate_model(self, model: str) -> bool:

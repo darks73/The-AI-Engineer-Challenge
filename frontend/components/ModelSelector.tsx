@@ -53,9 +53,15 @@ const MODELS: ModelInfo[] = [
   
   // Claude Models
   {
+    id: 'claude-haiku-4-5',
+    name: 'Claude Haiku 4.5',
+    description: 'Latest Haiku - Fast, intelligent, and cost-effective',
+    provider: 'claude'
+  },
+  {
     id: 'claude-3-5-haiku-20241022',
     name: 'Claude 3.5 Haiku',
-    description: 'Latest and most capable Claude model',
+    description: 'Previous generation Haiku model',
     provider: 'claude'
   },
   {
