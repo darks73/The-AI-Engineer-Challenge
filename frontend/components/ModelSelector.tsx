@@ -176,7 +176,7 @@ export default function ModelSelector({
 
         {/* Provider Dropdown */}
         {showProviderDropdown && (
-          <div className="absolute top-full left-0 mt-1 w-48 bg-dark-surface border border-dark-border rounded-lg shadow-lg z-50">
+          <div className="absolute bottom-full left-0 mb-1 w-48 bg-dark-surface border border-dark-border rounded-lg shadow-lg z-50">
             <div className="py-1">
               <button
                 onClick={() => handleProviderSelect('openai')}
@@ -221,7 +221,7 @@ export default function ModelSelector({
 
         {/* Model Dropdown */}
         {showModelDropdown && (
-          <div className="absolute top-full left-0 mt-1 w-64 bg-dark-surface border border-dark-border rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
+          <div className="absolute bottom-full left-0 mb-1 w-64 bg-dark-surface border border-dark-border rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
             <div className="py-1">
               {currentProviderModels.map((modelOption) => (
                 <button
@@ -247,12 +247,10 @@ export default function ModelSelector({
       </div>
 
       {/* Tooltip */}
-      {showProviderDropdown || showModelDropdown ? null : (
-        <div className="text-xs text-dark-text-secondary">
-          <span className="hidden sm:inline">Ctrl+/ to switch model</span>
-          <span className="sm:hidden">Model</span>
-        </div>
-      )}
+      <div className="text-xs text-dark-text-secondary">
+        <span className="hidden sm:inline">Ctrl+/ to switch model</span>
+        <span className="sm:hidden">Model</span>
+      </div>
     </div>
   )
 }
